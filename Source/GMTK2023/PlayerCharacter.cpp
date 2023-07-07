@@ -10,6 +10,7 @@ APlayerCharacter::APlayerCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	grabStarted = false;
 	
 }
 
@@ -17,6 +18,9 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	previousGrabLocation = GetActorLocation();
+	grabStartLocation = GetActorLocation();
 
 	//camera->ProjectionMode = ECameraProjectionMode::Orthographic;
 	//camera->OrthoWidth = 1000.0f;
@@ -43,7 +47,7 @@ void APlayerCharacter::BeginPlay()
 	}
 
 
-
+	GetWorld()->GetFirstPlayerController()->SetControlRotation(FVector(0.0f, 1.0f, 0.0f).Rotation());
 
 
 
@@ -55,9 +59,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
+	//playerCamera->SetWorldRotation((GetActorLocation() - playerCamera->GetComponentLocation()).GetSafeNormal().ToOrientationRotator());
 	
-
+	playerCamera->SetRelativeLocation(FVector::ZeroVector);
 }
 
 // Called to bind functionality to input
@@ -71,7 +75,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		//GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::White, "valid");
 
 		playerEnhancedInput->BindAction(leftDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::leftDownInput);
+		playerEnhancedInput->BindAction(leftReleaseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::leftReleaseInput);
 
+		playerEnhancedInput->BindAction(rightDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::rightDownInput);
+
+
+		playerEnhancedInput->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::lookInput);
 
 	}
 
@@ -82,6 +91,18 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 
 
+void APlayerCharacter::lookInput(const FInputActionValue& value) {
+
+	//turn
+	//AddControllerPitchInput(value.Get<FVector2D>().Y * 20.0f);
+	//AddControllerYawInput(value.Get<FVector2D>().X * 20.0f);
+
+
+
+
+}
+
+
 
 void APlayerCharacter::leftClickInput(const FInputActionValue& value) {
 
@@ -90,7 +111,42 @@ void APlayerCharacter::leftClickInput(const FInputActionValue& value) {
 
 void APlayerCharacter::leftDownInput(const FInputActionValue& value) {
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Left Down");
+
+
+	//check if the cursor is over a timeline
+	FHitResult cursorHit;
+	//get the cursor hit result
+	Cast<APlayerController>(GetController())->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, cursorHit);
+	//if the cursor is over anything
+	if (cursorHit.bBlockingHit) {
+		
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "hit");
+
+
+		FVector tempLocation = cursorHit.Location;
+		tempLocation.Y = GetActorLocation().Y;
+
+		if (!grabStarted) {
+			grabStartLocation = tempLocation;
+			previousGrabLocation = tempLocation;
+			grabStarted = true;
+		}
+
+		SetActorLocation(GetActorLocation() - tempLocation - previousGrabLocation);
+
+		previousGrabLocation = tempLocation;
+
+	}
+
+
 }
+
+
+void APlayerCharacter::leftReleaseInput(const FInputActionValue& value) {
+	grabStarted = false;
+}
+
+
 
 
 void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
@@ -99,5 +155,6 @@ void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 
 
 void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Right Down");
 
 }

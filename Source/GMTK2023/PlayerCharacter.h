@@ -16,6 +16,10 @@
 #include "Engine/EngineTypes.h"
 
 
+#include "Camera/CameraComponent.h"
+
+
+
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -33,13 +37,27 @@ public:
 
 
 
+	UPROPERTY(BlueprintReadWrite)
+		UCameraComponent* playerCamera;
 
+
+	UPROPERTY(BlueprintReadOnly)
+		FVector grabStartLocation;
+
+	UPROPERTY(BlueprintReadOnly)
+		FVector previousGrabLocation;
+
+	UPROPERTY(BlueprintReadOnly)
+		bool grabStarted;
 
 
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controls")
 		UInputAction* leftClickAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controls")
+		UInputAction* leftReleaseAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controls")
 		UInputAction* leftDownAction;
@@ -50,6 +68,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controls")
 		UInputAction* rightDownAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controls")
+		UInputAction* lookAction;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control Mappings")
@@ -61,10 +81,16 @@ public:
 
 
 	UFUNCTION()
+		void lookInput(const FInputActionValue& value);
+
+	UFUNCTION()
 		void leftClickInput(const FInputActionValue& value);
 
 	UFUNCTION()
 		void leftDownInput(const FInputActionValue& value);
+
+	UFUNCTION()
+		void leftReleaseInput(const FInputActionValue& value);
 
 	UFUNCTION()
 		void rightClickInput(const FInputActionValue& value);
