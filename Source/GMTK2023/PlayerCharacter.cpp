@@ -62,6 +62,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 	//playerCamera->SetWorldRotation((GetActorLocation() - playerCamera->GetComponentLocation()).GetSafeNormal().ToOrientationRotator());
 	
 	playerCamera->SetRelativeLocation(FVector::ZeroVector);
+
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, GetActorLocation().ToString());
+
 }
 
 // Called to bind functionality to input
@@ -122,19 +126,21 @@ void APlayerCharacter::leftDownInput(const FInputActionValue& value) {
 		
 		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "hit");
 
-
+		//get the current grab location
 		FVector tempLocation = cursorHit.Location;
 		tempLocation.Y = GetActorLocation().Y;
 
 		if (!grabStarted) {
+
 			grabStartLocation = tempLocation;
-			previousGrabLocation = tempLocation;
+			
 			grabStarted = true;
 		}
+		else {
+			SetActorLocation(GetActorLocation() + (grabStartLocation - tempLocation));
+		}
 
-		SetActorLocation(GetActorLocation() - tempLocation - previousGrabLocation);
-
-		previousGrabLocation = tempLocation;
+		
 
 	}
 
