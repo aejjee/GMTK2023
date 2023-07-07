@@ -156,7 +156,7 @@ void APlayerCharacter::leftReleaseInput(const FInputActionValue& value) {
 
 
 void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
-	
+
 }
 
 
