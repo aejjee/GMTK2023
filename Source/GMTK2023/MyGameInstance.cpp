@@ -7,17 +7,28 @@
 
 USoundBase* UMyGameInstance::GetNextMusicTrack()
 {
-	int newTrackIndex = FMath::RandRange(0, MusicTracks.Num() - 1);
+	int newTrackIndex = FMath::RandRange(0, InGameMusicTracks.Num() - 1);
 	if (newTrackIndex < 0)
 	{
 		return nullptr;
 	}
-	return MusicTracks[newTrackIndex];
+	return InGameMusicTracks[newTrackIndex];
 }
 
 void UMyGameInstance::Init()
 {
 	Super::Init();
+}
+
+void UMyGameInstance::SetMusicVolume(float volume)
+{
+	MusicVolume = volume;
+	CurrentAudioComponent->AdjustVolume(1, MusicVolume);
+}
+
+void UMyGameInstance::PlayMainMenuMusic()
+{
+	PlayMusicTrack(MainMenuMusicTrack);
 }
 
 void UMyGameInstance::PlayMusic()
@@ -32,6 +43,26 @@ void UMyGameInstance::PlayMusic()
 	}
 }
 
+void UMyGameInstance::PlayMusicTrack(USoundBase* track)
+{
+	if (track == nullptr)
+	{
+		return;
+	}
+	if (CurrentAudioComponent != nullptr)
+	{
+		CurrentAudioComponent->Stop();
+		CurrentAudioComponent->OnAudioFinished.Remove(TrackFinished);
+	}
+	CurrentAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), track,
+		MusicVolume, 1, 0.0, nullptr, true);
+	TrackFinished.BindUFunction(this, "GoToNextMusicTrack");
+	CurrentAudioComponent->OnAudioFinished.Add(TrackFinished);
+	
+	CurrentAudioComponent->Activate();
+	CurrentAudioComponent->Play();
+}
+
 void UMyGameInstance::PauseMusic()
 {
 	if (CurrentAudioComponent == nullptr)
@@ -43,16 +74,5 @@ void UMyGameInstance::PauseMusic()
 
 void UMyGameInstance::GoToNextMusicTrack()
 {
-	if (CurrentAudioComponent != nullptr)
-	{
-		CurrentAudioComponent->Stop();
-		CurrentAudioComponent->OnAudioFinished.Remove(TrackFinished);
-	}
-	CurrentAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), GetNextMusicTrack(),
-		MusicVolume, 1, 0.0, nullptr, true);
-	TrackFinished.BindUFunction(this, "GoToNextMusicTrack");
-	CurrentAudioComponent->OnAudioFinished.Add(TrackFinished);
-	
-	CurrentAudioComponent->Activate();
-	CurrentAudioComponent->Play();
+	PlayMusicTrack(GetNextMusicTrack());
 }
