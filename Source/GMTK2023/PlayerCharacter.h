@@ -39,10 +39,6 @@ class GMTK2023_API APlayerCharacter : public APaperCharacter
 public:
 	APlayerCharacter();
 
-
-
-
-
 	UPROPERTY(BlueprintReadWrite)
 		UCameraComponent* playerCamera;
 
@@ -121,6 +117,10 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+private:
+	// Spawns an enemy at the given location.
+	void SpawnEnemy(const FVector& location);
 
 public:
 	// Called every frame

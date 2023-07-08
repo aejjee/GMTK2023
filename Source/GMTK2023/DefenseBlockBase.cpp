@@ -54,7 +54,8 @@ void ADefenseBlockBase::StartAttack()
 		Attack();
 		GetSprite()->SetFlipbook(AttackAnimation);
 		GetWorldTimerManager().SetTimer(IdleTimeHandle, this,
-			&ADefenseBlockBase::ResetToIdleAnimation, AttackAnimation->GetTotalDuration(), false);
+			&ADefenseBlockBase::ResetToIdleAnimation,
+			GetAnimationDuration(AttackAnimation), false);
 	}
 	
 }
@@ -99,6 +100,11 @@ void ADefenseBlockBase::ResetToIdleAnimation()
 	GetSprite()->SetFlipbook(IdleAnimation);
 }
 
+float ADefenseBlockBase::GetAnimationDuration(UPaperFlipbook* animation)
+{
+	return animation->GetTotalDuration() * (1 / GetSprite()->GetPlayRate());
+}
+
 // Called every frame
 void ADefenseBlockBase::Tick(float DeltaTime)
 {
@@ -111,5 +117,5 @@ void ADefenseBlockBase::DamageBlock(int damage)
 	GetSprite()->SetFlipbook(TakeDamageAnimation);
 	GetWorldTimerManager().SetTimer(HealthCheckTimeHandle, this,
 		&ADefenseBlockBase::CheckRemainingHealth,
-		TakeDamageAnimation->GetTotalDuration(), false);
+		GetAnimationDuration(TakeDamageAnimation), false);
 }

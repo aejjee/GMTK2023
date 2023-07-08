@@ -118,4 +118,7 @@ private:
 	// A oneliner that gets called after a certain duration to reset the flipbook
 	// to the idle animation
 	void ResetToIdleAnimation();
+
+	// Gets the number of seconds for this animation, taking play rate into account.
+	float GetAnimationDuration(UPaperFlipbook* animation);
 };

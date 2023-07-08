@@ -3,10 +3,13 @@
 
 #include "TroopBase.h"
 
+#include "PaperFlipbook.h"
+#include "PaperFlipbookComponent.h"
 
 
 // Sets default values
 ATroopBase::ATroopBase()
+	: SpawnCost(10)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -45,7 +48,8 @@ void ATroopBase::Tick(float DeltaTime)
 	}
 
 	//if combat is on and game is unpaused
-	if (!CurrentGameMode->GetGamePaused() && CurrentGameMode->IsWaveInProgress()) {
+	if (!CurrentGameMode->GetGamePaused() && CurrentGameMode->IsWaveInProgress()
+		&& !idle) {
 
 		Move(DeltaTime);
 	}
@@ -55,14 +59,17 @@ void ATroopBase::Tick(float DeltaTime)
 void ATroopBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	
-
 }
 
 
 void ATroopBase::DamageHealth(float value) {
 	health -= value;
+	if (health <= 0)
+	{
+		CurrentGameMode->NumOfEnemies--;
+		GetSprite()->SetFlipbook(DeathAnimation);
+		SetLifeSpan(5.0f);
+	}
 }
 
 TArray<AActor*> ATroopBase::GetTargets() {
@@ -114,15 +121,11 @@ void ATroopBase::AdvanceLocation() {
 
 void ATroopBase::Move(float DeltaTime) {
 
-
 	//if there is a targeted path marker, and we aren't currently attacking a tower, then move towards the marker
 	if (targetLocation && !targetedTower) {
 
 		FVector toTargetLocation = targetLocation->GetActorLocation() - GetActorLocation();
 
-		float x = GetActorRotation().Vector().X;
-		float y = GetActorRotation().Vector().Y;
-		float z = GetActorRotation().Vector().Z;
 		// Flip rotation right or left based on x direction.
 		FRotator newRotation;
 		if (toTargetLocation.X > 0)
@@ -140,6 +143,12 @@ void ATroopBase::Move(float DeltaTime) {
 		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), true, &hitResult);
 
 		//but if troop is blocked by another troop rather than something else then move anyways
+		
+		if (hitResult.GetActor() == nullptr)
+		{
+			// Keeps the editor from dying if an enemy gets killed.
+			return;
+		}
 		if (hitResult.bBlockingHit && hitResult.GetActor()->ActorHasTag("troop")) {
 			SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), false);
 		}
@@ -147,4 +156,9 @@ void ATroopBase::Move(float DeltaTime) {
 		//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, targetLocation->GetName());
 
 	}
+}
+
+float ATroopBase::GetAnimationDuration(UPaperFlipbook* animation)
+{
+	return animation->GetTotalDuration() * (1 / GetSprite()->GetPlayRate());
 }

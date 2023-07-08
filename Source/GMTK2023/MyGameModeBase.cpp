@@ -8,6 +8,11 @@ void AMyGameModeBase::PauseGameButAllowCamera(bool isPaused)
 	bGamePausedButAllowCamera = isPaused;
 }
 
+AMyGameModeBase::AMyGameModeBase()
+	: CurrentCurrency(30), NumOfEnemies(0)
+{
+}
+
 bool AMyGameModeBase::GetGamePaused()
 {
 	return bGamePausedButAllowCamera;
@@ -26,4 +31,5 @@ void AMyGameModeBase::StartWave()
 void AMyGameModeBase::FinishWave()
 {
 	bCombatMode = false;
+	CurrentCurrency = MaxCurrency + CurrencyPerWave;	
 }
