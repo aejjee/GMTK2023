@@ -51,6 +51,10 @@ public:
 		bool grabStarted;
 
 
+	UPROPERTY(BlueprintReadWrite)
+		bool combatMode;
+
+
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controls")

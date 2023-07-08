@@ -12,6 +12,8 @@ APlayerCharacter::APlayerCharacter()
 
 	grabStarted = false;
 	
+
+	combatMode = false;
 }
 
 // Called when the game starts or when spawned
