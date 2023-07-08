@@ -3,8 +3,6 @@
 
 #include "PlayerCharacter.h"
 
-#include "TroopBase.h"
-
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -16,8 +14,6 @@ APlayerCharacter::APlayerCharacter()
 	
 
 	combatMode = false;
-
-	spawnTimer = 0.0f;
 }
 
 // Called when the game starts or when spawned
@@ -64,8 +60,6 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	spawnTimer += DeltaTime;
 
 	//playerCamera->SetWorldRotation((GetActorLocation() - playerCamera->GetComponentLocation()).GetSafeNormal().ToOrientationRotator());
 	
@@ -172,35 +166,6 @@ void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 
 void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Right Down");
-
-
-	
-
-	APlayerController* playerController = Cast<APlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
-
-	//check if the cursor is over a timeline
-	FHitResult cursorHit;
-	//get the cursor hit result
-	playerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, cursorHit);
-	
-	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType) {
-
-		spawnTimer = 0.0f;
-
-		FActorSpawnParameters params;
-		
-		FVector spawnLocation = cursorHit.Location;
-		spawnLocation.Y = 15.0f;
-
-		FTransform spawnTransform;
-		spawnTransform.SetLocation(spawnLocation);
-		spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
-
-		
-		GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
-	}
-	
-
 
 }
 

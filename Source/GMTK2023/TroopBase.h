@@ -13,6 +13,8 @@
 
 #include "Marker.h"
 
+#include "PlayerCharacter.h"
+
 #include "TroopBase.generated.h"
 
 /**
@@ -27,6 +29,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 		float health;
+
+	UPROPERTY(BlueprintReadWrite)
+		bool idle;
 
 	UPROPERTY(BlueprintReadWrite)
 		AMarker* targetLocation;
@@ -70,5 +75,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		virtual void AdvanceLocation();
+
+	UFUNCTION()
+		virtual void Move(float DeltaTime);
 
 };
