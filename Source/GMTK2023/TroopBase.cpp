@@ -63,10 +63,15 @@ void ATroopBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 
 void ATroopBase::DamageHealth(float value) {
+	if (health <= 0)
+	{
+		// It's already about to die
+		return;
+	}
 	health -= value;
 	if (health <= 0)
 	{
-		CurrentGameMode->NumOfEnemies--;
+		CurrentGameMode->SetNumOfEnemies(CurrentGameMode->GetNumOfEnemies() - 1);
 		GetSprite()->SetFlipbook(DeathAnimation);
 		SetLifeSpan(5.0f);
 	}

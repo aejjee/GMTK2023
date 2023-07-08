@@ -21,6 +21,9 @@ private:
 
 	// Determines whether a wave is currently going.
 	bool bCombatMode;
+	
+	// The number of enemies spawned this wave.
+	int NumOfEnemies;
 
 public:
 	// The amount of currency the player currently has to spend on enemies.
@@ -34,10 +37,6 @@ public:
 	// The amount of additional currency the player gets at the start of each wave.
 	UPROPERTY(EditAnywhere)
 	int CurrencyPerWave;
-
-	// The number of enemies spawned this wave.
-	UPROPERTY(BlueprintReadOnly)
-	int NumOfEnemies;
 
 public:
 
@@ -63,4 +62,13 @@ public:
 	// Tells the game that the current wave is over.
 	UFUNCTION(BlueprintCallable)
 	void FinishWave();
+
+	// Gets the current number of enemies.
+	UFUNCTION(BlueprintGetter)
+	int GetNumOfEnemies() const;
+
+	// Sets the current number of enemies onscreen. When the number reaches 0,
+	// the wave is automatically ended.
+	UFUNCTION(BlueprintSetter)
+	void SetNumOfEnemies(int newNum);
 };

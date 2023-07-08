@@ -61,7 +61,7 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 		return;
 	}
 	CurrentGameMode->CurrentCurrency -= spawnCost;
-	CurrentGameMode->NumOfEnemies++;
+	CurrentGameMode->SetNumOfEnemies(CurrentGameMode->GetNumOfEnemies() + 1);
 	
 	spawnTimer = 0.0f;
 	
@@ -209,7 +209,7 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	}
 	
 	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType)
-		{
+	{
 		SpawnEnemy(cursorHit.Location);
 	}
 	

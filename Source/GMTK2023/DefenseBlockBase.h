@@ -75,7 +75,7 @@ public:
 
 	// Deal damage to this defense block, and returns true if it was killed.
 	UFUNCTION(BlueprintCallable)
-	void DamageBlock(int damageAmount);
+	void DamageBlock(int DamageAmount);
 
 	// Calls the blueprint attack function to attack an enemy.
 	UFUNCTION()

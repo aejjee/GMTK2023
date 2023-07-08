@@ -21,15 +21,9 @@ void AGlobTroop::BeginPlay()
 
 }
 
-// Called every frame
 void AGlobTroop::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (health <= 0.0f) {
-		Destroy();
-	}
-
 }
 
 // Called to bind functionality to input
