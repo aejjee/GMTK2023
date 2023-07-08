@@ -57,10 +57,12 @@ void ATroopBase::Tick(float DeltaTime)
 
 		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), true);
 
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, targetLocation->GetName());
+
 	}
 	
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, targetLocation->GetName());
+	
 
 }
 

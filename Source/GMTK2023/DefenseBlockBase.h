@@ -18,6 +18,9 @@ class GMTK2023_API ADefenseBlockBase : public APaperCharacter
 	
 public:
 
+	// Sets default values for this actor's properties
+	ADefenseBlockBase();
+
 	// This block's name.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Name;
@@ -42,8 +45,13 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<ATroopBase*> EnemiesInRange;
 	
-	// Sets default values for this actor's properties
-	ADefenseBlockBase();
+
+	
+
+
+
+
+	
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -57,22 +65,29 @@ public:
 	USphereComponent* RangeSphere;
 
 	// Calls the blueprint attack function to attack an enemy.
+	UFUNCTION()
 	void StartAttack();
 
 	// Implement in blueprints.
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void Attack();
+
+
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
+
+	UFUNCTION()
 	// Gets called whenever an enemy enters the attack range.
 	void ActorEnteredAttackRange(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
 
+
+	UFUNCTION()
 	// Gets called whenever an enemy enters the attack range.
 	void ActorExitedAttackRange(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor, UPrimitiveComponent* OtherComp,
