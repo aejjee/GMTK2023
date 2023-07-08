@@ -14,6 +14,7 @@ ATroopBase::ATroopBase()
 	Tags.Add("troop");
 
 	health = 100.0f;
+	idle = false;
 }
 
 // Called when the game starts or when spawned
@@ -33,7 +34,7 @@ void ATroopBase::BeginPlay()
 		targetLocation = levelLocations[0];
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, "Location size" + FString::SanitizeFloat(levelLocations.Num()));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, "Location size" + FString::SanitizeFloat(levelLocations.Num()));
 	
 
 }
@@ -49,18 +50,14 @@ void ATroopBase::Tick(float DeltaTime)
 	}
 
 
-	if (targetLocation && !targetedTower) {
+	//if combat is on
+	if (!idle && Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->combatMode) {
 
-		FVector toTargetLocation = targetLocation->GetActorLocation() - GetActorLocation();
-
-		SetActorRotation(toTargetLocation.GetSafeNormal().Rotation());
-
-		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), true);
-
+		Move(DeltaTime);
+		
 	}
-	
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, targetLocation->GetName());
+	
 
 }
 
@@ -98,7 +95,7 @@ TArray<AActor*> ATroopBase::GetTargets() {
 
 TArray<AMarker*> ATroopBase::GetLocationPath() {
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "searching");
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "searching");
 	
 	TArray<AMarker*> locations;
 
@@ -106,7 +103,7 @@ TArray<AMarker*> ATroopBase::GetLocationPath() {
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "Marker", markerActors);
 
 	for (AActor* marker : markerActors) {
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, marker->GetName());
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, marker->GetName());
 		locations.Add(Cast<AMarker>(marker));
 	}
 
@@ -122,4 +119,29 @@ void ATroopBase::AdvanceLocation() {
 		targetLocation = levelLocations[currentLocationPosition];
 	}
 	
+}
+
+
+void ATroopBase::Move(float DeltaTime) {
+
+
+	//if there is a targeted path marker, and we aren't currently attacking a tower, then move towards the marker
+	if (targetLocation && !targetedTower) {
+
+		FVector toTargetLocation = targetLocation->GetActorLocation() - GetActorLocation();
+
+		SetActorRotation(toTargetLocation.GetSafeNormal().Rotation());
+
+		//do a sweep move
+		FHitResult hitResult;
+		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), true, &hitResult);
+
+		//but if troop is blocked by another troop rather than something else then move anyways
+		if (hitResult.bBlockingHit && hitResult.GetActor()->ActorHasTag("troop")) {
+			SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), false);
+		}
+
+		//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, targetLocation->GetName());
+
+	}
 }

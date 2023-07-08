@@ -7,7 +7,7 @@
 
 // Sets default values
 ADefenseBlockBase::ADefenseBlockBase()
-	: BlockCost(10), Health(100.0f), Damage(10.0f), AttackCooldownTime(3.0f)
+	: BlockCost(10), Health(100.0f), Damage(10.0f), AttackCooldownTime(1.0f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;

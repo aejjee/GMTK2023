@@ -20,7 +20,12 @@
 
 
 
+
 #include "PlayerCharacter.generated.h"
+
+
+
+class ATroopBase;
 
 /**
  * 
@@ -54,6 +59,12 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		bool combatMode;
 
+
+
+	UPROPERTY(BlueprintReadWrite)
+		TSubclassOf<ATroopBase> spawnType;
+	UPROPERTY(BlueprintReadWrite)
+		float spawnTimer;
 
 
 
