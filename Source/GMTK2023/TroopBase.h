@@ -11,7 +11,7 @@
 
 
 
-#include "LocationMarker.h"
+#include "Marker.h"
 
 #include "TroopBase.generated.h"
 
@@ -29,13 +29,13 @@ public:
 		float health;
 
 	UPROPERTY(BlueprintReadWrite)
-		ALocationMarker* targetLocation;
+		AMarker* targetLocation;
 
 	UPROPERTY(BlueprintReadWrite)
-		ALocationMarker* nextLocation;
+		AMarker* nextLocation;
 
 	UPROPERTY(BlueprintReadWrite)
-		TMap<int, ALocationMarker*> levelLocations;
+		TMap<int, AMarker*> levelLocations;
 
 	UPROPERTY(BlueprintReadWrite)
 		int currentLocationPosition;
@@ -66,7 +66,7 @@ public:
 		virtual TArray<AActor*> GetTargets();
 
 	UFUNCTION(BlueprintCallable)
-		virtual TArray<ALocationMarker*> GetLocationPath();
+		virtual TArray<AMarker*> GetLocationPath();
 
 	UFUNCTION(BlueprintCallable)
 		virtual void AdvanceLocation();

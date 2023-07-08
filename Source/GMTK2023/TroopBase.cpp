@@ -21,14 +21,19 @@ void ATroopBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (levelLocations.Num() > 0) {
-		TArray<ALocationMarker*> tempLocations = GetLocationPath();
-		for (ALocationMarker* loc : tempLocations) {
-			levelLocations.Add(TTuple<int, ALocationMarker*>({ loc->markerPosition, loc }));
+
+	TArray<AMarker*> tempLocations = GetLocationPath();
+
+	if (tempLocations.Num() > 0) {
+		
+		for (AMarker* loc : tempLocations) {
+			levelLocations.Add(TTuple<int, AMarker*>({ loc->markerIndex, loc }));
 		}
 
 		targetLocation = levelLocations[0];
 	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, "Location size" + FString::SanitizeFloat(levelLocations.Num()));
 	
 
 }
@@ -54,6 +59,8 @@ void ATroopBase::Tick(float DeltaTime)
 
 	}
 	
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, targetLocation->GetName());
 
 }
 
@@ -82,22 +89,25 @@ TArray<AActor*> ATroopBase::GetTargets() {
 	
 
 	for (AActor* targetActor : targetActors) {
-		targets.Add(Cast<ALocationMarker>(targetActor));
+		targets.Add(Cast<AMarker>(targetActor));
 	}
 	
 
 	return targets;
 }
 
-TArray<ALocationMarker*> ATroopBase::GetLocationPath() {
+TArray<AMarker*> ATroopBase::GetLocationPath() {
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, "searching");
 	
-	TArray<ALocationMarker*> locations;
+	TArray<AMarker*> locations;
 
 	TArray<AActor*> markerActors;
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("Marker"), markerActors);
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "Marker", markerActors);
 
 	for (AActor* marker : markerActors) {
-		locations.Add(Cast<ALocationMarker>(marker));
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, marker->GetName());
+		locations.Add(Cast<AMarker>(marker));
 	}
 
 
