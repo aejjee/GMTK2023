@@ -6,6 +6,7 @@
 #include "TroopBase.h"
 #include "Components/SphereComponent.h"
 #include "PaperCharacter.h"
+#include "PaperFlipbook.h"
 #include "DefenseBlockBase.generated.h"
 
 /**
@@ -45,24 +46,32 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<ATroopBase*> EnemiesInRange;
 	
+	// The sphere used to check if enemies are in range.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USphereComponent* RangeSphere;
 
+	// The animation that plays when this block is idle
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPaperFlipbook* IdleAnimation;
 	
-
-
-
-
+	// The animation that plays when this block attacks.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPaperFlipbook* AttackAnimation;
 	
+	// The animation that plays when this block takes damage.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPaperFlipbook* TakeDamageAnimation;
 
+	// The animation that plays when this block dies.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPaperFlipbook* DestroyedAnimation;
+public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Deal damage to this defense block, and returns true if it was killed.
 	UFUNCTION(BlueprintCallable)
-	bool DamageBlock(int damageAmount);
-
-	// The sphere used to check if enemies are in range.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USphereComponent* RangeSphere;
+	void DamageBlock(int damageAmount);
 
 	// Calls the blueprint attack function to attack an enemy.
 	UFUNCTION()
@@ -72,20 +81,26 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void Attack();
 
-
-	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
 
+	// Used to run the attack timer
+	FTimerHandle AttackTimeHandle;
+	
+	// Used to run the reset animation timer
+	FTimerHandle IdleTimeHandle;
+	
+	// Used to run the health check timer after taking damage
+	FTimerHandle HealthCheckTimeHandle;
+	
 	UFUNCTION()
 	// Gets called whenever an enemy enters the attack range.
 	void ActorEnteredAttackRange(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
-
 
 	UFUNCTION()
 	// Gets called whenever an enemy enters the attack range.
@@ -93,6 +108,10 @@ private:
 		AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex);
 
-	// Used to run the attack timer
-	FTimerHandle InputTimeHandle;
+	// Checks whether this block should be destroyed now.
+	void CheckRemainingHealth();
+
+	// A oneliner that gets called after a certain duration to reset the flipbook
+	// to the idle animation
+	void ResetToIdleAnimation();
 };

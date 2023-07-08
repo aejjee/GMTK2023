@@ -130,7 +130,20 @@ void ATroopBase::Move(float DeltaTime) {
 
 		FVector toTargetLocation = targetLocation->GetActorLocation() - GetActorLocation();
 
-		SetActorRotation(toTargetLocation.GetSafeNormal().Rotation());
+		float x = GetActorRotation().Vector().X;
+		float y = GetActorRotation().Vector().Y;
+		float z = GetActorRotation().Vector().Z;
+		// Flip rotation right or left based on x direction.
+		FRotator newRotation;
+		if (toTargetLocation.X > 0)
+		{
+			newRotation = (GetRootComponent()->GetForwardVector()).GetAbs().Rotation();
+		}
+		else
+		{
+			newRotation = ((GetRootComponent()->GetForwardVector()).GetAbs() * -1).Rotation();
+		}
+		SetActorRotation(newRotation);
 
 		//do a sweep move
 		FHitResult hitResult;

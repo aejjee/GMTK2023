@@ -2,7 +2,8 @@
 
 
 #include "DefenseBlockBase.h"
-
+#include "PaperFlipbookComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -20,16 +21,18 @@ ADefenseBlockBase::ADefenseBlockBase()
 		&ADefenseBlockBase::ActorExitedAttackRange);
 
 	GetCharacterMovement()->GravityScale = 0.0f;
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
 void ADefenseBlockBase::BeginPlay()
 {
 	Super::BeginPlay();
+	GetSprite()->SetFlipbook(IdleAnimation);
 	if (Damage > 0)
 	{
-		GetWorldTimerManager().SetTimer(InputTimeHandle, this,
-			&ADefenseBlockBase::StartAttack, AttackCooldownTime, true, 0.0f);
+		GetWorldTimerManager().SetTimer(AttackTimeHandle, this,
+			&ADefenseBlockBase::StartAttack, AttackCooldownTime, true);
 	}
 }
 
@@ -42,7 +45,14 @@ void ADefenseBlockBase::StartAttack()
 			EnemiesInRange.RemoveAt(i);	
 		}
 	}
-	Attack();
+	if (EnemiesInRange.Num() > 0)
+	{
+		Attack();
+		GetSprite()->SetFlipbook(AttackAnimation);
+		GetWorldTimerManager().SetTimer(IdleTimeHandle, this,
+			&ADefenseBlockBase::ResetToIdleAnimation, AttackAnimation->GetTotalDuration(), false);
+	}
+	
 }
 
 void ADefenseBlockBase::ActorEnteredAttackRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -67,19 +77,35 @@ void ADefenseBlockBase::ActorExitedAttackRange(UPrimitiveComponent* OverlappedCo
 	EnemiesInRange.Remove(enemy);
 }
 
+void ADefenseBlockBase::CheckRemainingHealth()
+{
+	if (Health <= 0)
+	{
+		GetSprite()->SetFlipbook(DestroyedAnimation);
+		SetLifeSpan(5.0f);
+	}
+	else
+	{
+		GetSprite()->SetFlipbook(IdleAnimation);
+	}
+}
+
+void ADefenseBlockBase::ResetToIdleAnimation()
+{
+	GetSprite()->SetFlipbook(IdleAnimation);
+}
+
 // Called every frame
 void ADefenseBlockBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-bool ADefenseBlockBase::DamageBlock(int damage)
+void ADefenseBlockBase::DamageBlock(int damage)
 {
 	Health -= damage;
-	if (Health <= 0)
-	{
-		this->Destroy();
-		return true;
-	}
-	return false;
+	GetSprite()->SetFlipbook(TakeDamageAnimation);
+	GetWorldTimerManager().SetTimer(HealthCheckTimeHandle, this,
+		&ADefenseBlockBase::CheckRemainingHealth,
+		TakeDamageAnimation->GetTotalDuration(), false);
 }
