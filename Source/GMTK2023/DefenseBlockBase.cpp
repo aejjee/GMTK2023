@@ -3,6 +3,8 @@
 
 #include "DefenseBlockBase.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
+
 // Sets default values
 ADefenseBlockBase::ADefenseBlockBase()
 	: BlockCost(10), Health(100.0f), Damage(10.0f), AttackCooldownTime(3.0f)
@@ -16,6 +18,8 @@ ADefenseBlockBase::ADefenseBlockBase()
 		&ADefenseBlockBase::ActorEnteredAttackRange);
 	RangeSphere->OnComponentEndOverlap.AddDynamic(this,
 		&ADefenseBlockBase::ActorExitedAttackRange);
+
+	GetCharacterMovement()->GravityScale = 0.0f;
 }
 
 // Called when the game starts or when spawned
