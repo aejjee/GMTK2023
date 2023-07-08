@@ -11,6 +11,7 @@ ALocationMarker::ALocationMarker()
 	Tags.Add("Marker");
 
 
+
 }
 
 // Called when the game starts or when spawned
