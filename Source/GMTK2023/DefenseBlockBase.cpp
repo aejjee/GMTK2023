@@ -22,6 +22,8 @@ ADefenseBlockBase::ADefenseBlockBase()
 
 	GetCharacterMovement()->GravityScale = 0.0f;
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCapsuleRadius(4.0f);
+	GetCapsuleComponent()->SetCapsuleHalfHeight(8.0f);
 }
 
 // Called when the game starts or when spawned
