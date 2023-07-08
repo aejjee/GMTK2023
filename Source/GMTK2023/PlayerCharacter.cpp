@@ -3,6 +3,7 @@
 
 #include "PlayerCharacter.h"
 
+#include "FogOfWarCloud.h"
 #include "TroopBase.h"
 
 
@@ -182,6 +183,13 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	FHitResult cursorHit;
 	//get the cursor hit result
 	playerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, cursorHit);
+	
+	AFogOfWarCloud* fogReference = Cast<AFogOfWarCloud>(cursorHit.GetActor());
+	if (fogReference != nullptr)
+	{
+		// We shouldn't spawn enemies in the fog of war zone.
+		return;
+	}
 	
 	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType) {
 
