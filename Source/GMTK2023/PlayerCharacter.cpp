@@ -13,10 +13,6 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	grabStarted = false;
-	
-
-	combatMode = false;
-
 	spawnTimer = 0.0f;
 }
 
@@ -24,6 +20,8 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CurrentGameMode = Cast<AMyGameModeBase>(GetWorld()->GetAuthGameMode());
 
 	previousGrabLocation = GetActorLocation();
 	grabStartLocation = GetActorLocation();
@@ -173,9 +171,11 @@ void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Right Down");
 
-
+	if (CurrentGameMode->IsWaveInProgress() || CurrentGameMode->GetGamePaused())
+	{
+		return;
+	}
 	
-
 	APlayerController* playerController = Cast<APlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
 
 	//check if the cursor is over a timeline

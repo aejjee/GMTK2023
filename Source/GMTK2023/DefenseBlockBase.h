@@ -65,6 +65,10 @@ public:
 	// The animation that plays when this block dies.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UPaperFlipbook* DestroyedAnimation;
+
+	// A reference to the current game mode.
+	UPROPERTY(BlueprintReadOnly)
+	AMyGameModeBase* CurrentGameMode;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

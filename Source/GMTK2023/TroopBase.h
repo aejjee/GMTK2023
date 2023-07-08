@@ -12,6 +12,7 @@
 
 
 #include "Marker.h"
+#include "MyGameModeBase.h"
 
 #include "PlayerCharacter.h"
 
@@ -31,9 +32,6 @@ public:
 		float health;
 
 	UPROPERTY(BlueprintReadWrite)
-		bool idle;
-
-	UPROPERTY(BlueprintReadWrite)
 		AMarker* targetLocation;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -48,10 +46,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float attackDamage;
 
-
 	UPROPERTY(BlueprintReadWrite)
 		AActor* targetedTower;
 
+	// A reference to the current game mode.
+	UPROPERTY(BlueprintReadOnly)
+	AMyGameModeBase* CurrentGameMode;
 
 protected:
 	// Called when the game starts or when spawned

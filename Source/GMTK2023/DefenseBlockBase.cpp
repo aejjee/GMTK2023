@@ -28,6 +28,7 @@ ADefenseBlockBase::ADefenseBlockBase()
 void ADefenseBlockBase::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentGameMode = Cast<AMyGameModeBase>(GetWorld()->GetAuthGameMode());
 	GetSprite()->SetFlipbook(IdleAnimation);
 	if (Damage > 0)
 	{
@@ -45,7 +46,8 @@ void ADefenseBlockBase::StartAttack()
 			EnemiesInRange.RemoveAt(i);	
 		}
 	}
-	if (EnemiesInRange.Num() > 0)
+	if (EnemiesInRange.Num() > 0 && !CurrentGameMode->GetGamePaused() &&
+		CurrentGameMode->IsWaveInProgress())
 	{
 		Attack();
 		GetSprite()->SetFlipbook(AttackAnimation);
