@@ -45,7 +45,8 @@ void ATroopBase::Tick(float DeltaTime)
 	}
 
 	//if combat is on and game is unpaused
-	if (!CurrentGameMode->GetGamePaused() && CurrentGameMode->IsWaveInProgress()) {
+	if (!CurrentGameMode->GetGamePaused() && CurrentGameMode->IsWaveInProgress()
+		&& !idle) {
 
 		Move(DeltaTime);
 	}
@@ -114,15 +115,11 @@ void ATroopBase::AdvanceLocation() {
 
 void ATroopBase::Move(float DeltaTime) {
 
-
 	//if there is a targeted path marker, and we aren't currently attacking a tower, then move towards the marker
 	if (targetLocation && !targetedTower) {
 
 		FVector toTargetLocation = targetLocation->GetActorLocation() - GetActorLocation();
 
-		float x = GetActorRotation().Vector().X;
-		float y = GetActorRotation().Vector().Y;
-		float z = GetActorRotation().Vector().Z;
 		// Flip rotation right or left based on x direction.
 		FRotator newRotation;
 		if (toTargetLocation.X > 0)
@@ -140,6 +137,12 @@ void ATroopBase::Move(float DeltaTime) {
 		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), true, &hitResult);
 
 		//but if troop is blocked by another troop rather than something else then move anyways
+		
+		if (hitResult.GetActor() == nullptr)
+		{
+			// Keeps the editor from dying if an enemy gets killed.
+			return;
+		}
 		if (hitResult.bBlockingHit && hitResult.GetActor()->ActorHasTag("troop")) {
 			SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), false);
 		}

@@ -37,6 +37,10 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		AMarker* nextLocation;
 
+	// Used to stop the troops if they get to the end of the path.	
+	UPROPERTY(BlueprintReadWrite)
+	bool idle;
+	
 	UPROPERTY(BlueprintReadWrite)
 		TMap<int, AMarker*> levelLocations;
 
