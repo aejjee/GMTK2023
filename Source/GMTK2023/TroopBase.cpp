@@ -48,7 +48,7 @@ void ATroopBase::Tick(float DeltaTime)
 
 		SetActorRotation(toTargetLocation.GetSafeNormal().Rotation());
 
-		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 100.0f * DeltaTime), true);
+		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), true);
 
 	}
 	
