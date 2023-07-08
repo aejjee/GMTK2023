@@ -8,6 +8,7 @@
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "MyGameModeBase.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 
 
@@ -55,10 +56,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		bool grabStarted;
 
-
-	UPROPERTY(BlueprintReadWrite)
-		bool combatMode;
-
+	// The current game mode.
+	UPROPERTY(BlueprintReadOnly)
+	AMyGameModeBase* CurrentGameMode;
 
 
 	UPROPERTY(BlueprintReadWrite)
@@ -96,8 +96,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control Mappings")
 		int32 baseControlsPriority = 0;
-
-
 
 	UFUNCTION()
 		void lookInput(const FInputActionValue& value);

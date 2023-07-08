@@ -14,7 +14,6 @@ ATroopBase::ATroopBase()
 	Tags.Add("troop");
 
 	health = 100.0f;
-	idle = false;
 }
 
 // Called when the game starts or when spawned
@@ -33,10 +32,7 @@ void ATroopBase::BeginPlay()
 
 		targetLocation = levelLocations[0];
 	}
-
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, "Location size" + FString::SanitizeFloat(levelLocations.Num()));
-	
-
+	CurrentGameMode = Cast<AMyGameModeBase>(GetWorld()->GetAuthGameMode());	
 }
 
 // Called every frame
@@ -44,21 +40,15 @@ void ATroopBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
 	if (health <= 0.0f) {
 		Destroy();
 	}
 
-
-	//if combat is on
-	if (!idle && Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->combatMode) {
+	//if combat is on and game is unpaused
+	if (!CurrentGameMode->GetGamePaused() && CurrentGameMode->IsWaveInProgress()) {
 
 		Move(DeltaTime);
-		
 	}
-
-	
-
 }
 
 // Called to bind functionality to input
@@ -130,7 +120,20 @@ void ATroopBase::Move(float DeltaTime) {
 
 		FVector toTargetLocation = targetLocation->GetActorLocation() - GetActorLocation();
 
-		SetActorRotation(toTargetLocation.GetSafeNormal().Rotation());
+		float x = GetActorRotation().Vector().X;
+		float y = GetActorRotation().Vector().Y;
+		float z = GetActorRotation().Vector().Z;
+		// Flip rotation right or left based on x direction.
+		FRotator newRotation;
+		if (toTargetLocation.X > 0)
+		{
+			newRotation = (GetRootComponent()->GetForwardVector()).GetAbs().Rotation();
+		}
+		else
+		{
+			newRotation = ((GetRootComponent()->GetForwardVector()).GetAbs() * -1).Rotation();
+		}
+		SetActorRotation(newRotation);
 
 		//do a sweep move
 		FHitResult hitResult;
