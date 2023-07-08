@@ -21,13 +21,15 @@ void ATroopBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (levelLocations.Num() > 0) {
+		TArray<ALocationMarker*> tempLocations = GetLocationPath();
+		for (ALocationMarker* loc : tempLocations) {
+			levelLocations.Add(TTuple<int, ALocationMarker*>({ loc->markerPosition, loc }));
+		}
 
-	TArray<ALocationMarker*> tempLocations = GetLocationPath();
-	for (ALocationMarker* loc : tempLocations) {
-		levelLocations.Add(TTuple<int, ALocationMarker*>({ loc->markerPosition, loc }));
+		targetLocation = levelLocations[0];
 	}
 	
-	targetLocation = levelLocations[0];
 
 }
 
