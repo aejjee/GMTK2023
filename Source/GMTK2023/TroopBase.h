@@ -30,7 +30,7 @@ public:
 		ALocationMarker* nextLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float damage;
+		float attackDamage;
 
 protected:
 	// Called when the game starts or when spawned
@@ -44,7 +44,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-		virtual void TakeDamage(float damage);
+		virtual void DamageHealth(float value);
 
 
 };

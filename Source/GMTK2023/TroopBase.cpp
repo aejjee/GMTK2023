@@ -11,7 +11,7 @@ ATroopBase::ATroopBase()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	grabStarted = false;
+	
 
 	health = 100.0f;
 }
@@ -46,8 +46,8 @@ void ATroopBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 }
 
 
-void ATroopBase::TakeDamage(float damage) {
-	health -= damage;
+void ATroopBase::DamageHealth(float value) {
+	health -= value;
 }
 
 
