@@ -50,13 +50,30 @@ void APlayerCharacter::BeginPlay()
 			Subsystem->AddMappingContext(baseControls, baseControlsPriority);
 		}
 	}
-
-
 	GetWorld()->GetFirstPlayerController()->SetControlRotation(FVector(0.0f, 1.0f, 0.0f).Rotation());
+}
 
+void APlayerCharacter::SpawnEnemy(const FVector& location)
+{
+	int spawnCost = spawnType->GetDefaultObject<ATroopBase>()->SpawnCost;
+	if (CurrentGameMode->CurrentCurrency < spawnCost)
+	{
+		return;
+	}
+	CurrentGameMode->CurrentCurrency -= spawnCost;
+	CurrentGameMode->NumOfEnemies++;
+	
+	spawnTimer = 0.0f;
+	
+	FActorSpawnParameters params;
+	FVector spawnLocation = location;
+	spawnLocation.Y = 10.0f;
 
-
-
+	FTransform spawnTransform;
+	spawnTransform.SetLocation(spawnLocation);
+	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
+	
+	GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
 }
 
 // Called every frame
@@ -191,21 +208,9 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 		return;
 	}
 	
-	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType) {
-
-		spawnTimer = 0.0f;
-
-		FActorSpawnParameters params;
-		
-		FVector spawnLocation = cursorHit.Location;
-		spawnLocation.Y = 15.0f;
-
-		FTransform spawnTransform;
-		spawnTransform.SetLocation(spawnLocation);
-		spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
-
-		
-		GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
+	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType)
+		{
+		SpawnEnemy(cursorHit.Location);
 	}
 	
 

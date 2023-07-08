@@ -23,6 +23,26 @@ private:
 	bool bCombatMode;
 
 public:
+	// The amount of currency the player currently has to spend on enemies.
+	UPROPERTY(BlueprintReadOnly)
+	int CurrentCurrency;
+
+	// The amount of currency the player has at the start of this wave.
+	UPROPERTY(BlueprintReadOnly)
+	int MaxCurrency;
+
+	// The amount of additional currency the player gets at the start of each wave.
+	UPROPERTY(EditAnywhere)
+	int CurrencyPerWave;
+
+	// The number of enemies spawned this wave.
+	UPROPERTY(BlueprintReadOnly)
+	int NumOfEnemies;
+
+public:
+
+	AMyGameModeBase();
+	
 	// Gets whether the game is currently paused, returning true if it is.
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool GetGamePaused();
@@ -30,7 +50,7 @@ public:
 	// Gets whether the current wave is in progress.
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsWaveInProgress();
-	
+
 	// Sets whether the game is paused (but still allow the player to move the
 	// camera around).
 	UFUNCTION(BlueprintCallable)

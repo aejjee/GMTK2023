@@ -3,10 +3,13 @@
 
 #include "TroopBase.h"
 
+#include "PaperFlipbook.h"
+#include "PaperFlipbookComponent.h"
 
 
 // Sets default values
 ATroopBase::ATroopBase()
+	: SpawnCost(10)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -56,14 +59,17 @@ void ATroopBase::Tick(float DeltaTime)
 void ATroopBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	
-
 }
 
 
 void ATroopBase::DamageHealth(float value) {
 	health -= value;
+	if (health <= 0)
+	{
+		CurrentGameMode->NumOfEnemies--;
+		GetSprite()->SetFlipbook(DeathAnimation);
+		SetLifeSpan(5.0f);
+	}
 }
 
 TArray<AActor*> ATroopBase::GetTargets() {
@@ -150,4 +156,9 @@ void ATroopBase::Move(float DeltaTime) {
 		//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, targetLocation->GetName());
 
 	}
+}
+
+float ATroopBase::GetAnimationDuration(UPaperFlipbook* animation)
+{
+	return animation->GetTotalDuration() * (1 / GetSprite()->GetPlayRate());
 }
