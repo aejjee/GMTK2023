@@ -5,6 +5,11 @@
 #include "CoreMinimal.h"
 #include "PaperCharacter.h"
 
+#include "Kismet/GameplayStatics.h"
+
+#include "Engine/EngineTypes.h"
+
+
 
 #include "LocationMarker.h"
 
@@ -29,8 +34,19 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		ALocationMarker* nextLocation;
 
+	UPROPERTY(BlueprintReadWrite)
+		TMap<int, ALocationMarker*> levelLocations;
+
+	UPROPERTY(BlueprintReadWrite)
+		int currentLocationPosition;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float attackDamage;
+
+
+	UPROPERTY(BlueprintReadWrite)
+		AActor* targetedTower;
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -46,5 +62,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void DamageHealth(float value);
 
+	UFUNCTION(BlueprintCallable)
+		virtual TArray<AActor*> GetTargets();
+
+	UFUNCTION(BlueprintCallable)
+		virtual TArray<ALocationMarker*> GetLocationPath();
+
+	UFUNCTION(BlueprintCallable)
+		virtual void AdvanceLocation();
 
 };

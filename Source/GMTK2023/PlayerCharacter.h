@@ -51,6 +51,10 @@ public:
 		bool grabStarted;
 
 
+	UPROPERTY(BlueprintReadWrite)
+		bool combatMode;
+
+
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controls")
@@ -70,6 +74,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controls")
 		UInputAction* lookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controls")
+		UInputAction* scrollAction;
+
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control Mappings")
@@ -97,6 +105,9 @@ public:
 
 	UFUNCTION()
 		void rightDownInput(const FInputActionValue& value);
+
+	UFUNCTION()
+		void scrollInput(const FInputActionValue& value);
 
 protected:
 	// Called when the game starts or when spawned

@@ -15,8 +15,11 @@ public:
 	// Sets default values for this actor's properties
 	ALocationMarker();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Marker Attributes")
 		int markerPosition;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Marker Attributes")
+		FString markerSpecialty;
 
 protected:
 	// Called when the game starts or when spawned

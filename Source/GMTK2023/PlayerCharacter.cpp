@@ -12,6 +12,8 @@ APlayerCharacter::APlayerCharacter()
 
 	grabStarted = false;
 	
+
+	combatMode = false;
 }
 
 // Called when the game starts or when spawned
@@ -85,6 +87,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 
 		playerEnhancedInput->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::lookInput);
+
+		playerEnhancedInput->BindAction(scrollAction, ETriggerEvent::Triggered, this, &APlayerCharacter::scrollInput);
 
 	}
 
@@ -163,4 +167,8 @@ void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Right Down");
 
+}
+
+void APlayerCharacter::scrollInput(const FInputActionValue& value) {
+	playerCamera->OrthoWidth = playerCamera->OrthoWidth * (1.0f - (0.1f * FMath::Sign(value.Get<float>())));
 }
