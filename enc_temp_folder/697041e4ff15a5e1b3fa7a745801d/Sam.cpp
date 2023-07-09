@@ -31,9 +31,7 @@ void ASam::Tick(float DeltaTime)
 }
 
 void ASam::SpawnTowers(int waveNumber) {
-	currentMoney = perRoundMoney * (float)(waveNumber + 1);
-
-
+	currentMoney = perRoundMoney;
 	if (GetCheapestTower()) {
 		float minRequiredMoney = GetCheapestTower()->GetDefaultObject<ADefenseBlockBase>()->BlockCost;
 

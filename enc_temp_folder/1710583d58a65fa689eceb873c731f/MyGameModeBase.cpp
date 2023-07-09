@@ -83,12 +83,6 @@ void AMyGameModeBase::StartWave()
 
 void AMyGameModeBase::FinishWave()
 {
-
-
-	sam->SpawnTowers(CurrentWaveCount);
-
-
-
 	bCombatMode = false;
 	StartingCurrency += CurrencyPerWave;
 	CurrentCurrency = StartingCurrency;
