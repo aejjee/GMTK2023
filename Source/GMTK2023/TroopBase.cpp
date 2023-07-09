@@ -154,7 +154,7 @@ ADefenseBlockBase* ATroopBase::FindClosestTarget() {
 	if (towerTargets.Num() > 0) {
 
 		ADefenseBlockBase* closest = nullptr;
-		float closestDist = 1000000.0;
+		float closestDist = 50.0;
 
 		FVector actLoc = GetActorLocation();
 		actLoc.Y = 0.0f;
@@ -249,6 +249,7 @@ void ATroopBase::Move(float DeltaTime) {
 			// Keeps the editor from dying if an enemy gets killed.
 			return;
 		}
+
 		if (hitResult.bBlockingHit && hitResult.GetActor()->ActorHasTag("troop")) {
 			SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), false);
 		}

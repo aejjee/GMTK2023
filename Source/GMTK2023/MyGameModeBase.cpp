@@ -6,6 +6,8 @@
 #include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "Sam.h"
+
 void AMyGameModeBase::PauseGameButAllowCamera(bool isPaused)
 {
 	bGamePausedButAllowCamera = isPaused;
@@ -61,4 +63,29 @@ void AMyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentCurrency = StartingCurrency;
+
+
+
+	sam = SpawnSam();
+
+	wave = 0;
+
+	sam->perRoundMoney = 30.0f;
+	sam->SpawnTowers(wave);
+
+}
+
+
+ASam* AMyGameModeBase::SpawnSam() {
+
+	FActorSpawnParameters params;
+
+	FTransform spawnTransform;
+	spawnTransform.SetLocation(FVector::ZeroVector);
+	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
+
+
+	ASam* retSam = GetWorld()->SpawnActor<ASam>(samClass, params);
+
+	return retSam;
 }
