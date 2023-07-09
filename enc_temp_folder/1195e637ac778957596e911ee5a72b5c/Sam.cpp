@@ -45,7 +45,7 @@ void ASam::SpawnTowers(int waveNumber) {
 		}
 
 		//sort the towers spots so that we buy on the higher priority spots first
-		Algo::SortBy(towerSpots, &ATowerSpot::priority, TGreater<>());
+		Algo::SortBy(towerSpots, &ATowerSpot::priority);
 
 		//now loop through the towers spots and try to build
 		for (ATowerSpot* towerSpot : towerSpots) {

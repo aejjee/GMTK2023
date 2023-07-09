@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "MyGameModeBase.generated.h"
 
+class ASam;
+
 /**
  * 
  */
@@ -37,6 +39,16 @@ public:
 	// The amount of additional currency the player gets at the start of each wave.
 	UPROPERTY(EditAnywhere)
 	int CurrencyPerWave;
+
+	UPROPERTY(BlueprintReadOnly)
+		int wave;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<ASam> samClass;
+
+	UPROPERTY(BlueprintReadOnly)
+		ASam* sam;
+
 
 public:
 
@@ -71,6 +83,12 @@ public:
 	// the wave is automatically ended.
 	UFUNCTION(BlueprintSetter)
 	void SetNumOfEnemies(int newNum);
+
+
+
+
+	UFUNCTION()
+		ASam* SpawnSam();
 
 protected:
 	virtual void BeginPlay() override;

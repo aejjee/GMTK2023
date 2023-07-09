@@ -27,8 +27,14 @@ public:
 	// Sets default values for this actor's properties
 	ASam();
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<TSubclassOf<ADefenseBlockBase>> towerTypes;
 	
+	UPROPERTY(BlueprintReadWrite)
+		float perRoundMoney;
+
+	UPROPERTY(BlueprintReadWrite)
+		float currentMoney;
 
 protected:
 	// Called when the game starts or when spawned
@@ -37,5 +43,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+
+	UFUNCTION(BLueprintCallable)
+		void SpawnTowers(int waveNumber);
+
+	UFUNCTION(BlueprintCallable)
+		TSubclassOf<ADefenseBlockBase> GetCheapestTower();
 
 };
