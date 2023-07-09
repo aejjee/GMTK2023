@@ -61,18 +61,19 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 		return;
 	}
 	CurrentGameMode->CurrentCurrency -= spawnCost;
-	CurrentGameMode->NumOfEnemies++;
+	CurrentGameMode->SetNumOfEnemies(CurrentGameMode->GetNumOfEnemies() + 1);
 	
 	spawnTimer = 0.0f;
 	
 	FActorSpawnParameters params;
 	FVector spawnLocation = location;
-	spawnLocation.Y = 10.0f;
-
+	spawnLocation.Y = 0.0f;
+	
 	FTransform spawnTransform;
 	spawnTransform.SetLocation(spawnLocation);
 	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
-	
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, spawnType->GetFName().ToString());
 	GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
 }
 
@@ -210,7 +211,7 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	}
 	
 	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType)
-		{
+	{
 		SpawnEnemy(cursorHit.Location);
 	}
 	

@@ -3,13 +3,16 @@
 
 #include "MyGameModeBase.h"
 
+#include "PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+
 void AMyGameModeBase::PauseGameButAllowCamera(bool isPaused)
 {
 	bGamePausedButAllowCamera = isPaused;
 }
 
 AMyGameModeBase::AMyGameModeBase()
-	: CurrentCurrency(30), NumOfEnemies(0)
+	: NumOfEnemies(0), CurrentCurrency(50), StartingCurrency(50)
 {
 }
 
@@ -26,10 +29,36 @@ bool AMyGameModeBase::IsWaveInProgress()
 void AMyGameModeBase::StartWave()
 {
 	bCombatMode = true;
+	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
+	if (playerCharacter == nullptr)
+	{
+		return;
+	}
 }
 
 void AMyGameModeBase::FinishWave()
 {
 	bCombatMode = false;
-	CurrentCurrency = MaxCurrency + CurrencyPerWave;	
+	StartingCurrency += CurrencyPerWave;
+	CurrentCurrency = StartingCurrency;
+}
+
+int AMyGameModeBase::GetNumOfEnemies() const
+{
+	return NumOfEnemies;
+}
+
+void AMyGameModeBase::SetNumOfEnemies(int newNum)
+{
+	NumOfEnemies = newNum;
+	if (NumOfEnemies <= 0)
+	{
+		FinishWave();
+	}
+}
+
+void AMyGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+	CurrentCurrency = StartingCurrency;
 }
