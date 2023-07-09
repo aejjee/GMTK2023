@@ -73,6 +73,12 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
 
 	GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
+
+
+	if (spawnCue) {
+		UGameplayStatics::PlaySound2D(GetWorld(), spawnCue);
+	}
+
 }
 
 // Called every frame
