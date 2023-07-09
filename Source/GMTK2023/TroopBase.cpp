@@ -91,7 +91,7 @@ void ATroopBase::Tick(float DeltaTime)
 		//if in range of the tower then attack
 		if (inAttackRange && attackTimer > attackSpeed) {
 
-			bool killed = targetedTower->DamageBlock(attackDamage);
+			targetedTower->DamageBlock(attackDamage);
 
 			if (targetedTower->Health <= 0.0f) {
 				targetedTower = nullptr;
@@ -319,7 +319,7 @@ void ATroopBase::ActorExitedAttackRange(AActor* MyOverlappedActor, AActor* Other
 	towerTargets.Remove(enemy);
 }
 
-}
+
 
 float ATroopBase::GetAnimationDuration(UPaperFlipbook* animation)
 {
