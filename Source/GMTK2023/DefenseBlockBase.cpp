@@ -21,9 +21,14 @@ ADefenseBlockBase::ADefenseBlockBase()
 		&ADefenseBlockBase::ActorExitedAttackRange);
 
 	GetCharacterMovement()->GravityScale = 0.0f;
+
+
+	Tags.Add("Tower");
+
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCapsuleRadius(4.0f);
 	GetCapsuleComponent()->SetCapsuleHalfHeight(8.0f);
+
 }
 
 // Called when the game starts or when spawned
@@ -69,6 +74,9 @@ void ADefenseBlockBase::ActorEnteredAttackRange(UPrimitiveComponent* OverlappedC
 		return;
 	}
 	EnemiesInRange.Add(enemy);
+	enemy->towerTargets.Add(this);
+
+
 }
 
 void ADefenseBlockBase::ActorExitedAttackRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -80,6 +88,10 @@ void ADefenseBlockBase::ActorExitedAttackRange(UPrimitiveComponent* OverlappedCo
 		return;
 	}
 	EnemiesInRange.Remove(enemy);
+	enemy->towerTargets.Remove(this);
+
+
+
 }
 
 void ADefenseBlockBase::CheckRemainingHealth()

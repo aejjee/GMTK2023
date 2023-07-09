@@ -201,6 +201,7 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	//get the cursor hit result
 	playerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, cursorHit);
 	
+
 	AFogOfWarCloud* fogReference = Cast<AFogOfWarCloud>(cursorHit.GetActor());
 	if (fogReference != nullptr)
 	{

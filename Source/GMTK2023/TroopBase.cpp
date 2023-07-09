@@ -6,6 +6,8 @@
 #include "PaperFlipbook.h"
 #include "PaperFlipbookComponent.h"
 
+#include "DefenseBlockBase.h"
+
 
 // Sets default values
 ATroopBase::ATroopBase()
@@ -17,6 +19,20 @@ ATroopBase::ATroopBase()
 	Tags.Add("troop");
 
 	health = 100.0f;
+
+	idle = false;
+
+	targetSearchTime = 0.0f;
+	attackTimer = 0.0f;
+
+	//OnActorBeginOverlap.AddDynamic(this, &ATroopBase::ActorEnteredAttackRange);
+	//OnActorEndOverlap.AddDynamic(this, &ATroopBase::ActorExitedAttackRange);
+
+	inAttackRange = false;
+
+	targetedTower = nullptr;
+
+
 }
 
 // Called when the game starts or when spawned
@@ -24,6 +40,7 @@ void ATroopBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	
 
 	TArray<AMarker*> tempLocations = GetLocationPath();
 
@@ -35,7 +52,9 @@ void ATroopBase::BeginPlay()
 
 		targetLocation = levelLocations[0];
 	}
+
 	CurrentGameMode = Cast<AMyGameModeBase>(GetWorld()->GetAuthGameMode());	
+
 }
 
 // Called every frame
@@ -43,15 +62,46 @@ void ATroopBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (health <= 0.0f) {
-		Destroy();
-	}
+
+	targetSearchTime += DeltaTime;
+	attackTimer += DeltaTime;
+
+	
 
 	//if combat is on and game is unpaused
 	if (!CurrentGameMode->GetGamePaused() && CurrentGameMode->IsWaveInProgress()
 		&& !idle) {
 
+		inAttackRange = IsValid(targetedTower) && inAttackRange;
+		
+		if (!targetedTower && targetSearchTime > 1.0f) {
+			targetSearchTime = 0.0f;
+
+			
+
+			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Searching for tower");
+
+			targetedTower = FindClosestTarget();
+		}
+		
+
 		Move(DeltaTime);
+
+
+		//if in range of the tower then attack
+		if (inAttackRange && attackTimer > attackSpeed) {
+
+			bool killed = targetedTower->DamageBlock(attackDamage);
+
+			if (targetedTower->Health <= 0.0f) {
+				targetedTower = nullptr;
+			}
+
+			PlayAttackAnimation();
+
+			attackTimer = 0.0f;
+		}
+
 	}
 }
 
@@ -62,20 +112,26 @@ void ATroopBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 }
 
 
-void ATroopBase::DamageHealth(float value) {
+bool ATroopBase::DamageHealth(float value) {
 	health -= value;
-	if (health <= 0)
-	{
-		CurrentGameMode->NumOfEnemies--;
+
+
+	if (health <= 0.0f) {
+	    CurrentGameMode->NumOfEnemies--;
 		GetSprite()->SetFlipbook(DeathAnimation);
 		SetLifeSpan(5.0f);
+		Destroy();
+		return true;
 	}
+
+	return false;
+
 }
 
-TArray<AActor*> ATroopBase::GetTargets() {
+TArray<ADefenseBlockBase*> ATroopBase::GetTargets() {
 
 	
-	TArray<AActor*> targets;
+	TArray<ADefenseBlockBase*> targets;
 
 	TArray<AActor*> targetActors;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("Tower"), targetActors);
@@ -83,12 +139,60 @@ TArray<AActor*> ATroopBase::GetTargets() {
 	
 
 	for (AActor* targetActor : targetActors) {
-		targets.Add(Cast<AMarker>(targetActor));
+		targets.Add(Cast<ADefenseBlockBase>(targetActor));
 	}
 	
 
 	return targets;
 }
+
+
+ADefenseBlockBase* ATroopBase::FindClosestTarget() {
+
+	
+
+
+	//only if there are tower targets find the closest
+	if (towerTargets.Num() > 0) {
+
+		ADefenseBlockBase* closest = nullptr;
+		float closestDist = 1000000.0;
+
+		FVector actLoc = GetActorLocation();
+		actLoc.Y = 0.0f;
+
+		for (ADefenseBlockBase* tower : towerTargets) {
+			
+			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, tower->GetName());
+
+
+			FVector towerLoc = tower->GetActorLocation();
+			towerLoc.Y = 0.0f;
+
+			float d = FVector::Dist(actLoc, towerLoc);
+
+			if (d < closestDist) {
+				closestDist = d;
+				closest = tower;
+			}
+
+
+		}
+
+		return closest;
+
+
+	}
+	else {
+
+		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, "No Towers In Sight");
+	}
+
+	return nullptr;
+
+}
+
+
 
 TArray<AMarker*> ATroopBase::GetLocationPath() {
 
@@ -126,17 +230,15 @@ void ATroopBase::Move(float DeltaTime) {
 
 		FVector toTargetLocation = targetLocation->GetActorLocation() - GetActorLocation();
 
-		// Flip rotation right or left based on x direction.
-		FRotator newRotation;
-		if (toTargetLocation.X > 0)
-		{
-			newRotation = (GetRootComponent()->GetForwardVector()).GetAbs().Rotation();
-		}
-		else
-		{
-			newRotation = ((GetRootComponent()->GetForwardVector()).GetAbs() * -1).Rotation();
-		}
-		SetActorRotation(newRotation);
+
+        //rotate only facing left or right
+		FVector rotationV = toTargetLocation;
+		rotationV.Z = 0.0f;
+		rotationV.Y = 0.0f;
+
+		SetActorRotation(rotationV.GetSafeNormal().Rotation());
+
+
 
 		//do a sweep move
 		FHitResult hitResult;
@@ -156,9 +258,71 @@ void ATroopBase::Move(float DeltaTime) {
 		//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, targetLocation->GetName());
 
 	}
+
+	else if (targetedTower) {
+		FVector toTargetTower = targetedTower->GetActorLocation() - FVector(0.0f, 0.0f, 20.0f) - GetActorLocation();
+		toTargetTower.Y = GetActorLocation().Y;
+
+		FVector rotationV = toTargetTower;
+		rotationV.Z = 0.0f;
+		rotationV.Y = 0.0f;
+
+
+		
+		SetActorRotation(rotationV.GetSafeNormal().Rotation());
+		//SetActorRotation(FVector(-1.0f, 0.0f, 0.0f).Rotation());
+
+
+		//dont move once close enough
+		if (toTargetTower.Length() > attackRange) {
+			//do a sweep move
+			FHitResult hitResult;
+			SetActorLocation(GetActorLocation() + (toTargetTower.GetSafeNormal() * 30.0f * DeltaTime), true, &hitResult);
+
+			//but if troop is blocked by another troop rather than something else then move anyways
+			if (hitResult.bBlockingHit && hitResult.GetActor()->ActorHasTag("troop")) {
+				SetActorLocation(GetActorLocation() + (toTargetTower.GetSafeNormal() * 30.0f * DeltaTime), false);
+			}
+		}
+		else if(!inAttackRange) {
+
+
+			//if in attack range
+			inAttackRange = true;
+		}
+		
+	}
+}
+
+
+
+
+
+void ATroopBase::ActorEnteredAttackRange(AActor* MyOverlappedActor, AActor* OtherActor)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, OtherActor->GetName());
+	ADefenseBlockBase* enemy = Cast<ADefenseBlockBase>(OtherActor);
+	if (enemy == nullptr)
+	{
+		return;
+	}
+	towerTargets.Add(enemy);
+}
+
+void ATroopBase::ActorExitedAttackRange(AActor* MyOverlappedActor, AActor* OtherActor)
+{
+	ADefenseBlockBase* enemy = Cast<ADefenseBlockBase>(OtherActor);
+	if (enemy == nullptr)
+	{
+		return;
+	}
+	towerTargets.Remove(enemy);
+}
+
 }
 
 float ATroopBase::GetAnimationDuration(UPaperFlipbook* animation)
 {
 	return animation->GetTotalDuration() * (1 / GetSprite()->GetPlayRate());
 }
+
