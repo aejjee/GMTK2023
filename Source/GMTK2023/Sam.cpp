@@ -12,7 +12,9 @@ ASam::ASam()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	
+	spawnQueued = false;
+	spawnDelayTimer = 0.0f;
+	spawnWaveNumber = 0;
 
 }
 
@@ -28,10 +30,34 @@ void ASam::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
+	if (spawnQueued) {
+		spawnDelayTimer += DeltaTime;
+
+		if (spawnDelayTimer > spawnDelay) {
+			spawnQueued = false;
+			ForceSpawnTowers(spawnWaveNumber);
+		}
+	}
+
+
 }
 
 void ASam::SpawnTowers(int waveNumber) {
-	currentMoney = perRoundMoney;
+	
+	spawnQueued = true;
+	spawnDelayTimer = 0.0f;
+	spawnWaveNumber = waveNumber;
+
+}
+
+
+
+void ASam::ForceSpawnTowers(int waveNumber) {
+
+	currentMoney = perRoundMoney * (float)(waveNumber + 1);
+
+
 	if (GetCheapestTower()) {
 		float minRequiredMoney = GetCheapestTower()->GetDefaultObject<ADefenseBlockBase>()->BlockCost;
 
@@ -52,7 +78,7 @@ void ASam::SpawnTowers(int waveNumber) {
 
 			//only start trying to spawn if sam still has enough money
 			if (currentMoney >= minRequiredMoney && waveNumber >= towerSpot->waveUnlock) {
-				
+
 
 				//while this tower is unoccupied keep trying to spawn
 				while (!towerSpot->occupied) {
@@ -80,6 +106,7 @@ void ASam::SpawnTowers(int waveNumber) {
 
 						towerSpot->occupied = true;
 						towerSpot->OccupyingTower = spawned;
+						spawned->towerSpot = towerSpot;
 
 						currentMoney -= towerTypes[rand]->GetDefaultObject<ADefenseBlockBase>()->BlockCost;
 
@@ -91,10 +118,16 @@ void ASam::SpawnTowers(int waveNumber) {
 			}
 		}
 	}
-	
-
 
 }
+
+
+
+
+
+
+
+
 
 TSubclassOf<ADefenseBlockBase> ASam::GetCheapestTower() {
 	float cost = 1000000.0f;
