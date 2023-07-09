@@ -1,6 +1,6 @@
 # GMTK2023
 
-##About
+## About
 
 Game created for the GMTK Game Jam 2023 in 48 hours.
 itch.io page: https://aejjee.itch.io/samnslime
