@@ -6,6 +6,8 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "TowerSpot.h"
+
 // Sets default values
 ADefenseBlockBase::ADefenseBlockBase()
 	: BlockCost(10), StartingHealth(100.0f), CurrencyReward(10), Damage(10.0f),
@@ -130,6 +132,10 @@ void ADefenseBlockBase::DamageBlock(int damage)
 		CurrentGameMode->StartingCurrency += CurrencyReward;
 		GetSprite()->SetFlipbook(DestroyedAnimation);
 		SetLifeSpan(DestroyedAnimation->GetTotalDuration());
+
+		towerSpot->occupied = false;
+		towerSpot->OccupyingTower = nullptr;
+
 	}
 	else
 	{

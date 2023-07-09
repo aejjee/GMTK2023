@@ -36,6 +36,19 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		float currentMoney;
 
+
+	UPROPERTY()
+		bool spawnQueued;
+
+	UPROPERTY()
+		float spawnDelayTimer;
+
+	UPROPERTY(EditAnywhere)
+		float spawnDelay = 1.0f;
+
+	UPROPERTY()
+		int spawnWaveNumber;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -50,5 +63,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		TSubclassOf<ADefenseBlockBase> GetCheapestTower();
+
+	UFUNCTION(BlueprintCallable)
+		void ForceSpawnTowers(int waveNumber);
 
 };
