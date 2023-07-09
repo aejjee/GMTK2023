@@ -62,11 +62,8 @@ void ATroopBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
 	targetSearchTime += DeltaTime;
 	attackTimer += DeltaTime;
-
-	
 
 	//if combat is on and game is unpaused
 	if (!CurrentGameMode->GetGamePaused() && CurrentGameMode->IsWaveInProgress()
@@ -77,13 +74,10 @@ void ATroopBase::Tick(float DeltaTime)
 		if (!targetedTower && targetSearchTime > 1.0f) {
 			targetSearchTime = 0.0f;
 
-			
-
 			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, "Searching for tower");
 
 			targetedTower = FindClosestTarget();
 		}
-		
 
 		Move(DeltaTime);
 
@@ -93,7 +87,6 @@ void ATroopBase::Tick(float DeltaTime)
 
 			targetedTower->DamageBlock(attackDamage);
 
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, "Removed Target Tower");
 
 
 			if (targetedTower->CurrentHealth <= 0.0f) {
@@ -156,10 +149,6 @@ TArray<ADefenseBlockBase*> ATroopBase::GetTargets() {
 
 
 ADefenseBlockBase* ATroopBase::FindClosestTarget() {
-
-	
-
-
 	//only if there are tower targets find the closest
 	if (towerTargets.Num() > 0) {
 
@@ -237,11 +226,17 @@ void ATroopBase::Move(float DeltaTime) {
 		return;
 	}
 
+	// If the player manually overrides the location markers, then go there
+	// instead.
+	if (PlayerOverrideMarker != nullptr)
+	{
+		targetLocation = PlayerOverrideMarker;	
+	}
+	
 	//if there is a targeted path marker, and we aren't currently attacking a tower, then move towards the marker
 	if (targetLocation && !targetedTower) {
 
 		FVector toTargetLocation = targetLocation->GetActorLocation() - GetActorLocation();
-
 
         //rotate only facing left or right
 		FVector rotationV = toTargetLocation;
@@ -249,8 +244,6 @@ void ATroopBase::Move(float DeltaTime) {
 		rotationV.Y = 0.0f;
 
 		SetActorRotation(rotationV.GetSafeNormal().Rotation());
-
-
 
 		//do a sweep move
 		FHitResult hitResult;
@@ -280,11 +273,8 @@ void ATroopBase::Move(float DeltaTime) {
 		rotationV.Z = 0.0f;
 		rotationV.Y = 0.0f;
 
-
-		
 		SetActorRotation(rotationV.GetSafeNormal().Rotation());
 		//SetActorRotation(FVector(-1.0f, 0.0f, 0.0f).Rotation());
-
 
 		//dont move once close enough
 		if (toTargetTower.Length() > attackRange) {
@@ -304,8 +294,6 @@ void ATroopBase::Move(float DeltaTime) {
 			}
 		}
 		else if(!inAttackRange) {
-
-
 			//if in attack range
 			inAttackRange = true;
 		}
@@ -313,13 +301,8 @@ void ATroopBase::Move(float DeltaTime) {
 	}
 }
 
-
-
-
-
 void ATroopBase::ActorEnteredAttackRange(AActor* MyOverlappedActor, AActor* OtherActor)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, OtherActor->GetName());
 	ADefenseBlockBase* enemy = Cast<ADefenseBlockBase>(OtherActor);
 	if (enemy == nullptr)
 	{
@@ -340,7 +323,13 @@ void ATroopBase::ActorExitedAttackRange(AActor* MyOverlappedActor, AActor* Other
 
 void ATroopBase::OverrideLocationMarker(AMarker* marker)
 {
-		
+	PlayerOverrideMarker = marker;
+}
+
+void ATroopBase::ReachedPlayerMarker()
+{
+	PlayerOverrideMarker = nullptr;
+	targetLocation = levelLocations[currentLocationPosition];
 }
 
 float ATroopBase::GetAnimationDuration(UPaperFlipbook* animation)

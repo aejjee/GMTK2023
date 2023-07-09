@@ -54,6 +54,10 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::SpawnEnemy(const FVector& location)
 {
+	if (CurrentGameMode->IsWaveInProgress() || CurrentGameMode->GetGamePaused())
+	{
+		return;
+	}
 	int spawnCost = spawnType->GetDefaultObject<ATroopBase>()->SpawnCost;
 	if (CurrentGameMode->CurrentCurrency < spawnCost)
 	{
@@ -92,6 +96,11 @@ void APlayerCharacter::CreateLocationMarker(const FVector& location)
 	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
 
 	AMarker* marker = GetWorld()->SpawnActor<AMarker>(MarkerType, spawnTransform, params);
+	if (marker == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("Location marker is null pointer")); 
+		return;
+	}
 	FString tag = FString("PlayerOverride");
 	marker->markerSpecialty = tag;
 
@@ -131,6 +140,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		playerEnhancedInput->BindAction(leftReleaseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::leftReleaseInput);
 
 		playerEnhancedInput->BindAction(rightDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::rightDownInput);
+		playerEnhancedInput->BindAction(rightClickAction, ETriggerEvent::Triggered, this, &APlayerCharacter::rightClickInput);
 
 
 		playerEnhancedInput->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::lookInput);
@@ -138,23 +148,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		playerEnhancedInput->BindAction(scrollAction, ETriggerEvent::Triggered, this, &APlayerCharacter::scrollInput);
 
 	}
-
-
-
-
 }
-
-
 
 void APlayerCharacter::lookInput(const FInputActionValue& value) {
 
 	//turn
 	//AddControllerPitchInput(value.Get<FVector2D>().Y * 20.0f);
 	//AddControllerYawInput(value.Get<FVector2D>().X * 20.0f);
-
-
-
-
 }
 
 
@@ -202,18 +202,8 @@ void APlayerCharacter::leftReleaseInput(const FInputActionValue& value) {
 
 
 void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
-
-}
-
-
-void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
-	if (CurrentGameMode->IsWaveInProgress() || CurrentGameMode->GetGamePaused())
-	{
-		return;
-	}
-	
 	APlayerController* playerController = Cast<APlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
-
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString("Right mouse click"));
 	//check if the cursor is over a timeline
 	FHitResult cursorHit;
 	//get the cursor hit result
@@ -240,7 +230,10 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 			SpawnEnemy(cursorHit.Location);
 		}
 	}
+}
 
+// change to right click input
+void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 }
 
 void APlayerCharacter::scrollInput(const FInputActionValue& value) {

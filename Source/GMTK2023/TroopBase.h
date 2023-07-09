@@ -145,6 +145,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OverrideLocationMarker(AMarker* marker);
 
+	// Tells the class to go back to following its regular route.
+	UFUNCTION(BlueprintCallable)
+	void ReachedPlayerMarker();
+
 private:
 	// Tells you whether this actor is dead and is about to be destroyed
 	bool IsDead;
