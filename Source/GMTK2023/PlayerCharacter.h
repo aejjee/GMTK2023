@@ -19,6 +19,7 @@
 
 #include "Camera/CameraComponent.h"
 
+#include "Sound/SoundCue.h"
 
 
 
@@ -59,8 +60,12 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<ATroopBase> spawnType;
+	
 	UPROPERTY(BlueprintReadWrite)
 		float spawnTimer;
+
+	UPROPERTY(EditAnywhere, BLueprintReadOnly)
+		USoundCue* spawnCue;
 
 
 
