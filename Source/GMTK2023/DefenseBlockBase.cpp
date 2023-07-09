@@ -133,8 +133,11 @@ void ADefenseBlockBase::DamageBlock(int damage)
 		GetSprite()->SetFlipbook(DestroyedAnimation);
 		SetLifeSpan(DestroyedAnimation->GetTotalDuration());
 
-		towerSpot->occupied = false;
-		towerSpot->OccupyingTower = nullptr;
+		if (towerSpot) {
+			towerSpot->occupied = false;
+			towerSpot->OccupyingTower = nullptr;
+		}
+		
 
 	}
 	else
