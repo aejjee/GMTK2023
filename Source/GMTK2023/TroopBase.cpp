@@ -3,12 +3,15 @@
 
 #include "TroopBase.h"
 
+#include "PaperFlipbook.h"
+#include "PaperFlipbookComponent.h"
 
 #include "DefenseBlockBase.h"
 
 
 // Sets default values
 ATroopBase::ATroopBase()
+	: SpawnCost(10)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -16,6 +19,7 @@ ATroopBase::ATroopBase()
 	Tags.Add("troop");
 
 	health = 100.0f;
+
 	idle = false;
 
 	targetSearchTime = 0.0f;
@@ -27,6 +31,7 @@ ATroopBase::ATroopBase()
 	inAttackRange = false;
 
 	targetedTower = nullptr;
+
 
 }
 
@@ -48,10 +53,8 @@ void ATroopBase::BeginPlay()
 		targetLocation = levelLocations[0];
 	}
 
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, "Location size" + FString::SanitizeFloat(levelLocations.Num()));
-	
-	//get references to all towers
-	//towerTargets = GetTargets();
+	CurrentGameMode = Cast<AMyGameModeBase>(GetWorld()->GetAuthGameMode());	
+
 }
 
 // Called every frame
@@ -59,14 +62,15 @@ void ATroopBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
 	targetSearchTime += DeltaTime;
 	attackTimer += DeltaTime;
 
 	
 
-
-	//if combat is on
-	if (!idle && Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())->combatMode) {
+	//if combat is on and game is unpaused
+	if (!CurrentGameMode->GetGamePaused() && CurrentGameMode->IsWaveInProgress()
+		&& !idle) {
 
 		inAttackRange = IsValid(targetedTower) && inAttackRange;
 		
@@ -83,6 +87,7 @@ void ATroopBase::Tick(float DeltaTime)
 
 		Move(DeltaTime);
 
+
 		//if in range of the tower then attack
 		if (inAttackRange && attackTimer > attackSpeed) {
 
@@ -96,32 +101,31 @@ void ATroopBase::Tick(float DeltaTime)
 
 			attackTimer = 0.0f;
 		}
-		
+
 	}
-
-	
-
 }
 
 // Called to bind functionality to input
 void ATroopBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	
-
 }
 
 
 bool ATroopBase::DamageHealth(float value) {
 	health -= value;
 
+
 	if (health <= 0.0f) {
+	    CurrentGameMode->NumOfEnemies--;
+		GetSprite()->SetFlipbook(DeathAnimation);
+		SetLifeSpan(5.0f);
 		Destroy();
 		return true;
 	}
 
 	return false;
+
 }
 
 TArray<ADefenseBlockBase*> ATroopBase::GetTargets() {
@@ -221,21 +225,18 @@ void ATroopBase::AdvanceLocation() {
 
 void ATroopBase::Move(float DeltaTime) {
 
-
 	//if there is a targeted path marker, and we aren't currently attacking a tower, then move towards the marker
 	if (targetLocation && !targetedTower) {
 
 		FVector toTargetLocation = targetLocation->GetActorLocation() - GetActorLocation();
 
 
+        //rotate only facing left or right
 		FVector rotationV = toTargetLocation;
 		rotationV.Z = 0.0f;
 		rotationV.Y = 0.0f;
 
-
 		SetActorRotation(rotationV.GetSafeNormal().Rotation());
-		//SetActorRotation(FVector(-1.0f, 0.0f, 0.0f).Rotation());
-
 
 
 
@@ -244,6 +245,12 @@ void ATroopBase::Move(float DeltaTime) {
 		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), true, &hitResult);
 
 		//but if troop is blocked by another troop rather than something else then move anyways
+		
+		if (hitResult.GetActor() == nullptr)
+		{
+			// Keeps the editor from dying if an enemy gets killed.
+			return;
+		}
 		if (hitResult.bBlockingHit && hitResult.GetActor()->ActorHasTag("troop")) {
 			SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), false);
 		}
@@ -251,6 +258,7 @@ void ATroopBase::Move(float DeltaTime) {
 		//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, targetLocation->GetName());
 
 	}
+
 	else if (targetedTower) {
 		FVector toTargetTower = targetedTower->GetActorLocation() - FVector(0.0f, 0.0f, 20.0f) - GetActorLocation();
 		toTargetTower.Y = GetActorLocation().Y;
@@ -310,3 +318,11 @@ void ATroopBase::ActorExitedAttackRange(AActor* MyOverlappedActor, AActor* Other
 	}
 	towerTargets.Remove(enemy);
 }
+
+}
+
+float ATroopBase::GetAnimationDuration(UPaperFlipbook* animation)
+{
+	return animation->GetTotalDuration() * (1 / GetSprite()->GetPlayRate());
+}
+

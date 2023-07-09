@@ -8,6 +8,7 @@
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "MyGameModeBase.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 
 
@@ -38,10 +39,6 @@ class GMTK2023_API APlayerCharacter : public APaperCharacter
 public:
 	APlayerCharacter();
 
-
-
-
-
 	UPROPERTY(BlueprintReadWrite)
 		UCameraComponent* playerCamera;
 
@@ -55,10 +52,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		bool grabStarted;
 
-
-	UPROPERTY(BlueprintReadWrite)
-		bool combatMode;
-
+	// The current game mode.
+	UPROPERTY(BlueprintReadOnly)
+	AMyGameModeBase* CurrentGameMode;
 
 
 	UPROPERTY(BlueprintReadWrite)
@@ -97,8 +93,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control Mappings")
 		int32 baseControlsPriority = 0;
 
-
-
 	UFUNCTION()
 		void lookInput(const FInputActionValue& value);
 
@@ -123,6 +117,10 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+private:
+	// Spawns an enemy at the given location.
+	void SpawnEnemy(const FVector& location);
 
 public:
 	// Called every frame

@@ -3,6 +3,7 @@
 
 #include "PlayerCharacter.h"
 
+#include "FogOfWarCloud.h"
 #include "TroopBase.h"
 
 
@@ -13,10 +14,6 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	grabStarted = false;
-	
-
-	combatMode = false;
-
 	spawnTimer = 0.0f;
 }
 
@@ -24,6 +21,8 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CurrentGameMode = Cast<AMyGameModeBase>(GetWorld()->GetAuthGameMode());
 
 	previousGrabLocation = GetActorLocation();
 	grabStartLocation = GetActorLocation();
@@ -51,13 +50,30 @@ void APlayerCharacter::BeginPlay()
 			Subsystem->AddMappingContext(baseControls, baseControlsPriority);
 		}
 	}
-
-
 	GetWorld()->GetFirstPlayerController()->SetControlRotation(FVector(0.0f, 1.0f, 0.0f).Rotation());
+}
 
+void APlayerCharacter::SpawnEnemy(const FVector& location)
+{
+	int spawnCost = spawnType->GetDefaultObject<ATroopBase>()->SpawnCost;
+	if (CurrentGameMode->CurrentCurrency < spawnCost)
+	{
+		return;
+	}
+	CurrentGameMode->CurrentCurrency -= spawnCost;
+	CurrentGameMode->NumOfEnemies++;
+	
+	spawnTimer = 0.0f;
+	
+	FActorSpawnParameters params;
+	FVector spawnLocation = location;
+	spawnLocation.Y = 10.0f;
 
-
-
+	FTransform spawnTransform;
+	spawnTransform.SetLocation(spawnLocation);
+	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
+	
+	GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
 }
 
 // Called every frame
@@ -173,9 +189,11 @@ void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Right Down");
 
-
+	if (CurrentGameMode->IsWaveInProgress() || CurrentGameMode->GetGamePaused())
+	{
+		return;
+	}
 	
-
 	APlayerController* playerController = Cast<APlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
 
 	//check if the cursor is over a timeline
@@ -183,24 +201,17 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	//get the cursor hit result
 	playerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, cursorHit);
 	
-	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType) {
 
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::White, "Spawn");
-
-
-		spawnTimer = 0.0f;
-
-		FActorSpawnParameters params;
-		
-		FVector spawnLocation = cursorHit.Location;
-		spawnLocation.Y = 10.0f;
-
-		FTransform spawnTransform;
-		spawnTransform.SetLocation(spawnLocation);
-		spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
-
-		
-		GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
+	AFogOfWarCloud* fogReference = Cast<AFogOfWarCloud>(cursorHit.GetActor());
+	if (fogReference != nullptr)
+	{
+		// We shouldn't spawn enemies in the fog of war zone.
+		return;
+	}
+	
+	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType)
+		{
+		SpawnEnemy(cursorHit.Location);
 	}
 	
 

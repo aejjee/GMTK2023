@@ -2,7 +2,8 @@
 
 
 #include "DefenseBlockBase.h"
-
+#include "PaperFlipbookComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -21,17 +22,25 @@ ADefenseBlockBase::ADefenseBlockBase()
 
 	GetCharacterMovement()->GravityScale = 0.0f;
 
+
 	Tags.Add("Tower");
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCapsuleRadius(4.0f);
+	GetCapsuleComponent()->SetCapsuleHalfHeight(8.0f);
+
 }
 
 // Called when the game starts or when spawned
 void ADefenseBlockBase::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentGameMode = Cast<AMyGameModeBase>(GetWorld()->GetAuthGameMode());
+	GetSprite()->SetFlipbook(IdleAnimation);
 	if (Damage > 0)
 	{
-		GetWorldTimerManager().SetTimer(InputTimeHandle, this,
-			&ADefenseBlockBase::StartAttack, AttackCooldownTime, true, 0.0f);
+		GetWorldTimerManager().SetTimer(AttackTimeHandle, this,
+			&ADefenseBlockBase::StartAttack, AttackCooldownTime, true);
 	}
 }
 
@@ -44,7 +53,16 @@ void ADefenseBlockBase::StartAttack()
 			EnemiesInRange.RemoveAt(i);	
 		}
 	}
-	Attack();
+	if (EnemiesInRange.Num() > 0 && !CurrentGameMode->GetGamePaused() &&
+		CurrentGameMode->IsWaveInProgress())
+	{
+		Attack();
+		GetSprite()->SetFlipbook(AttackAnimation);
+		GetWorldTimerManager().SetTimer(IdleTimeHandle, this,
+			&ADefenseBlockBase::ResetToIdleAnimation,
+			GetAnimationDuration(AttackAnimation), false);
+	}
+	
 }
 
 void ADefenseBlockBase::ActorEnteredAttackRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -57,7 +75,7 @@ void ADefenseBlockBase::ActorEnteredAttackRange(UPrimitiveComponent* OverlappedC
 	}
 	EnemiesInRange.Add(enemy);
 	enemy->towerTargets.Add(this);
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, "Added Self");
+
 
 }
 
@@ -71,9 +89,32 @@ void ADefenseBlockBase::ActorExitedAttackRange(UPrimitiveComponent* OverlappedCo
 	}
 	EnemiesInRange.Remove(enemy);
 	enemy->towerTargets.Remove(this);
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, "Removed Self");
 
 
+
+}
+
+void ADefenseBlockBase::CheckRemainingHealth()
+{
+	if (Health <= 0)
+	{
+		GetSprite()->SetFlipbook(DestroyedAnimation);
+		SetLifeSpan(5.0f);
+	}
+	else
+	{
+		GetSprite()->SetFlipbook(IdleAnimation);
+	}
+}
+
+void ADefenseBlockBase::ResetToIdleAnimation()
+{
+	GetSprite()->SetFlipbook(IdleAnimation);
+}
+
+float ADefenseBlockBase::GetAnimationDuration(UPaperFlipbook* animation)
+{
+	return animation->GetTotalDuration() * (1 / GetSprite()->GetPlayRate());
 }
 
 // Called every frame
@@ -82,13 +123,11 @@ void ADefenseBlockBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-bool ADefenseBlockBase::DamageBlock(int damage)
+void ADefenseBlockBase::DamageBlock(int damage)
 {
 	Health -= damage;
-	if (Health <= 0)
-	{
-		this->Destroy();
-		return true;
-	}
-	return false;
+	GetSprite()->SetFlipbook(TakeDamageAnimation);
+	GetWorldTimerManager().SetTimer(HealthCheckTimeHandle, this,
+		&ADefenseBlockBase::CheckRemainingHealth,
+		GetAnimationDuration(TakeDamageAnimation), false);
 }

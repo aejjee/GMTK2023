@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PaperCharacter.h"
-
+#include "PaperFlipbook.h"
 #include "Kismet/GameplayStatics.h"
 
 #include "Engine/EngineTypes.h"
@@ -13,6 +13,7 @@
 #include "PaperFlipbook.h"
 
 #include "Marker.h"
+#include "MyGameModeBase.h"
 
 #include "PlayerCharacter.h"
 
@@ -35,14 +36,19 @@ public:
 		float health;
 
 	UPROPERTY(BlueprintReadWrite)
-		bool idle;
-
-	UPROPERTY(BlueprintReadWrite)
 		AMarker* targetLocation;
 
 	UPROPERTY(BlueprintReadWrite)
 		AMarker* nextLocation;
 
+	// Used to stop the troops if they get to the end of the path.	
+	UPROPERTY(BlueprintReadWrite)
+	bool idle;
+
+	// The cost of this enemy in currency
+	UPROPERTY(BlueprintReadWrite)
+	int SpawnCost;	
+	
 	UPROPERTY(BlueprintReadWrite)
 		TMap<int, AMarker*> levelLocations;
 
@@ -54,8 +60,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float attackDamage;
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float attackRange = 10.0f;
+
 
 	UPROPERTY(BlueprintReadWrite)
 		bool inAttackRange;
@@ -79,6 +87,13 @@ public:
 	UPROPERTY()
 		float targetSearchTime;
 
+	// A reference to the current game mode.
+	UPROPERTY(BlueprintReadOnly)
+	AMyGameModeBase* CurrentGameMode;
+
+	// The animation that plays when this enemy dies.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPaperFlipbook* DeathAnimation;
 
 protected:
 	// Called when the game starts or when spawned
@@ -124,5 +139,10 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void PlayAttackAnimation();
+
+
+private:
+	// Gets the number of seconds for this animation, taking play rate into account.
+	float GetAnimationDuration(UPaperFlipbook* animation);
 
 };
