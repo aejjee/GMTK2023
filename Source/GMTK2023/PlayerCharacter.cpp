@@ -76,8 +76,11 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 	spawnTransform.SetLocation(spawnLocation);
 	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
 
-	GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
+	ATroopBase* spawned = GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
 
+	spawned->groupNumber = spawnGroup;
+
+	spawned->Tags.Add((FName)FString::FromInt(spawnGroup));
 
 	if (spawnCue) {
 		UGameplayStatics::PlaySound2D(GetWorld(), spawnCue);
