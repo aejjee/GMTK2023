@@ -12,7 +12,7 @@ void AMyGameModeBase::PauseGameButAllowCamera(bool isPaused)
 }
 
 AMyGameModeBase::AMyGameModeBase()
-	: NumOfEnemies(0), CurrentCurrency(50), MaxCurrency(50)
+	: NumOfEnemies(0), CurrentCurrency(50), StartingCurrency(50)
 {
 }
 
@@ -39,8 +39,8 @@ void AMyGameModeBase::StartWave()
 void AMyGameModeBase::FinishWave()
 {
 	bCombatMode = false;
-	MaxCurrency += CurrencyPerWave;
-	CurrentCurrency = MaxCurrency;
+	StartingCurrency += CurrencyPerWave;
+	CurrentCurrency = StartingCurrency;
 }
 
 int AMyGameModeBase::GetNumOfEnemies() const
@@ -55,4 +55,10 @@ void AMyGameModeBase::SetNumOfEnemies(int newNum)
 	{
 		FinishWave();
 	}
+}
+
+void AMyGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+	CurrentCurrency = StartingCurrency;
 }

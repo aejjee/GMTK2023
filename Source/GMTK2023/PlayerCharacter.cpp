@@ -67,12 +67,13 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 	
 	FActorSpawnParameters params;
 	FVector spawnLocation = location;
-	spawnLocation.Y = 10.0f;
-
+	spawnLocation.Y = 0.0f;
+	
 	FTransform spawnTransform;
 	spawnTransform.SetLocation(spawnLocation);
 	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
-	
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, spawnType->GetFName().ToString());
 	GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
 }
 

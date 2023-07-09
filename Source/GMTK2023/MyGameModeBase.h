@@ -31,8 +31,8 @@ public:
 	int CurrentCurrency;
 
 	// The amount of currency the player has at the start of this wave.
-	UPROPERTY(BlueprintReadOnly)
-	int MaxCurrency;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int StartingCurrency;
 
 	// The amount of additional currency the player gets at the start of each wave.
 	UPROPERTY(EditAnywhere)
@@ -71,4 +71,7 @@ public:
 	// the wave is automatically ended.
 	UFUNCTION(BlueprintSetter)
 	void SetNumOfEnemies(int newNum);
+
+protected:
+	virtual void BeginPlay() override;
 };
