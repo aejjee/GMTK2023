@@ -31,7 +31,8 @@ void AMyGameModeBase::SetNumOfTowers(int newNum)
 	{
 		// Win condition code here.
 		FinishWave();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Add the win code here"));	
+		//win
+		CallWinLossEvent(true);
 	}
 }
 
@@ -105,7 +106,7 @@ void AMyGameModeBase::FinishWave()
 	if (CurrentWaveCount > MaxWaveCount)
 	{
 		// Lose condition here
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Add the lose code here"));
+		CallWinLossEvent(false);
 	}
 	else
 	{
@@ -161,3 +162,4 @@ ASam* AMyGameModeBase::SpawnSam() {
 
 	return retSam;
 }
+
