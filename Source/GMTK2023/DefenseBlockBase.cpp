@@ -20,6 +20,8 @@ ADefenseBlockBase::ADefenseBlockBase()
 		&ADefenseBlockBase::ActorExitedAttackRange);
 
 	GetCharacterMovement()->GravityScale = 0.0f;
+
+	Tags.Add("Tower");
 }
 
 // Called when the game starts or when spawned
@@ -54,6 +56,9 @@ void ADefenseBlockBase::ActorEnteredAttackRange(UPrimitiveComponent* OverlappedC
 		return;
 	}
 	EnemiesInRange.Add(enemy);
+	enemy->towerTargets.Add(this);
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, "Added Self");
+
 }
 
 void ADefenseBlockBase::ActorExitedAttackRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -65,6 +70,10 @@ void ADefenseBlockBase::ActorExitedAttackRange(UPrimitiveComponent* OverlappedCo
 		return;
 	}
 	EnemiesInRange.Remove(enemy);
+	enemy->towerTargets.Remove(this);
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, "Removed Self");
+
+
 }
 
 // Called every frame

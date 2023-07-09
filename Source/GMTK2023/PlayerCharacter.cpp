@@ -185,12 +185,15 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	
 	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType) {
 
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::White, "Spawn");
+
+
 		spawnTimer = 0.0f;
 
 		FActorSpawnParameters params;
 		
 		FVector spawnLocation = cursorHit.Location;
-		spawnLocation.Y = 15.0f;
+		spawnLocation.Y = 10.0f;
 
 		FTransform spawnTransform;
 		spawnTransform.SetLocation(spawnLocation);
