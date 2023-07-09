@@ -142,6 +142,9 @@ public:
 
 
 private:
+	// Tells you whether this actor is dead and is about to be destroyed
+	bool IsDead;
+	
 	// Gets the number of seconds for this animation, taking play rate into account.
 	float GetAnimationDuration(UPaperFlipbook* animation);
 

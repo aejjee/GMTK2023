@@ -11,7 +11,7 @@
 
 // Sets default values
 ATroopBase::ATroopBase()
-	: SpawnCost(10)
+	: SpawnCost(10), IsDead(false)
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -93,7 +93,7 @@ void ATroopBase::Tick(float DeltaTime)
 
 			targetedTower->DamageBlock(attackDamage);
 
-			if (targetedTower->Health <= 0.0f) {
+			if (targetedTower->StartingHealth <= 0.0f) {
 				targetedTower = nullptr;
 			}
 
@@ -113,10 +113,16 @@ void ATroopBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 
 bool ATroopBase::DamageHealth(float value) {
+	if (IsDead)
+	{
+		return false;
+	}
+	
 	health -= value;
-
+	
 	if (health <= 0.0f) {
-		CurrentGameMode->SetNumOfEnemies(CurrentGameMode->GetNumOfEnemies());
+		IsDead = true;
+		CurrentGameMode->SetNumOfEnemies(CurrentGameMode->GetNumOfEnemies() - 1);
 		GetSprite()->SetFlipbook(DeathAnimation);
 		SetLifeSpan(0.33f);
 		return true;
@@ -222,6 +228,10 @@ void ATroopBase::AdvanceLocation() {
 
 
 void ATroopBase::Move(float DeltaTime) {
+	if (IsDead)
+	{
+		return;
+	}
 
 	//if there is a targeted path marker, and we aren't currently attacking a tower, then move towards the marker
 	if (targetLocation && !targetedTower) {
