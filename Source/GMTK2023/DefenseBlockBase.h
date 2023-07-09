@@ -9,6 +9,10 @@
 #include "PaperFlipbook.h"
 #include "DefenseBlockBase.generated.h"
 
+
+
+class ATowerSpot;
+
 /**
  * 
  */
@@ -32,7 +36,15 @@ public:
 
 	// This block's total health.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Health;
+	float StartingHealth;
+
+	// The amount of currency the player gets for destroying this tower.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrencyReward;
+	
+	// This character's current health
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentHealth;
 
 	// The damage this block does to enemies (if) it attacks.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -69,13 +81,20 @@ public:
 	// A reference to the current game mode.
 	UPROPERTY(BlueprintReadOnly)
 	AMyGameModeBase* CurrentGameMode;
+
+
+	// The spot that this tower is sitting on
+	UPROPERTY(BlueprintReadOnly)
+		ATowerSpot* towerSpot;
+
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Deal damage to this defense block, and returns true if it was killed.
 	UFUNCTION(BlueprintCallable)
-	void DamageBlock(int damageAmount);
+	void DamageBlock(int DamageAmount);
 
 	// Calls the blueprint attack function to attack an enemy.
 	UFUNCTION()
@@ -90,7 +109,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-
+	
 	// Used to run the attack timer
 	FTimerHandle AttackTimeHandle;
 	
@@ -99,6 +118,9 @@ private:
 	
 	// Used to run the health check timer after taking damage
 	FTimerHandle HealthCheckTimeHandle;
+
+	// Used to check whether this block is about to die.
+	bool IsDead;
 	
 	UFUNCTION()
 	// Gets called whenever an enemy enters the attack range.
@@ -111,9 +133,6 @@ private:
 	void ActorExitedAttackRange(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex);
-
-	// Checks whether this block should be destroyed now.
-	void CheckRemainingHealth();
 
 	// A oneliner that gets called after a certain duration to reset the flipbook
 	// to the idle animation

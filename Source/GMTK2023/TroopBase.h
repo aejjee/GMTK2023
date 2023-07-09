@@ -10,6 +10,7 @@
 #include "Engine/EngineTypes.h"
 
 
+#include "PaperFlipbook.h"
 
 #include "Marker.h"
 #include "MyGameModeBase.h"
@@ -17,6 +18,9 @@
 #include "PlayerCharacter.h"
 
 #include "TroopBase.generated.h"
+
+
+class ADefenseBlockBase;
 
 /**
  * 
@@ -28,7 +32,7 @@ class GMTK2023_API ATroopBase : public APaperCharacter
 public:
 	ATroopBase();
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float health;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -42,7 +46,7 @@ public:
 	bool idle;
 
 	// The cost of this enemy in currency
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int SpawnCost;	
 	
 	UPROPERTY(BlueprintReadWrite)
@@ -51,11 +55,37 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		int currentLocationPosition;
 	
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float attackDamage;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float attackRange = 10.0f;
+
+
 	UPROPERTY(BlueprintReadWrite)
-		AActor* targetedTower;
+		bool inAttackRange;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float attackSpeed = 0.5f;
+
+	UPROPERTY(BlueprintReadOnly)
+		float attackTimer;
+
+	UPROPERTY(BlueprintReadWrite)
+		UPaperFlipbook* attackAnimation;
+
+
+	UPROPERTY(BlueprintReadWrite)
+		ADefenseBlockBase* targetedTower;
+
+	UPROPERTY(BlueprintReadWrite)
+		TArray< ADefenseBlockBase*> towerTargets;
+
+	UPROPERTY()
+		float targetSearchTime;
 
 	// A reference to the current game mode.
 	UPROPERTY(BlueprintReadOnly)
@@ -77,10 +107,15 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-		virtual void DamageHealth(float value);
+		virtual bool DamageHealth(float value);
 
 	UFUNCTION(BlueprintCallable)
-		virtual TArray<AActor*> GetTargets();
+		virtual TArray<ADefenseBlockBase*> GetTargets();
+
+	UFUNCTION(BlueprintCallable)
+		virtual ADefenseBlockBase* FindClosestTarget();
+
+
 
 	UFUNCTION(BlueprintCallable)
 		virtual TArray<AMarker*> GetLocationPath();
@@ -91,7 +126,26 @@ public:
 	UFUNCTION()
 		virtual void Move(float DeltaTime);
 
+
+
+	//pulled from DefenseBlockBase
+	UFUNCTION()
+		// Gets called whenever an enemy enters the attack range.
+		void ActorEnteredAttackRange(AActor* MyOverlappedActor, AActor* OtherActor);
+
+	UFUNCTION()
+	// Gets called whenever an enemy enters the attack range.
+	void ActorExitedAttackRange(AActor* MyOverlappedActor, AActor* OtherActor);
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void PlayAttackAnimation();
+
+
 private:
+	// Tells you whether this actor is dead and is about to be destroyed
+	bool IsDead;
+	
 	// Gets the number of seconds for this animation, taking play rate into account.
 	float GetAnimationDuration(UPaperFlipbook* animation);
+
 };

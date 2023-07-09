@@ -6,9 +6,12 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "TowerSpot.h"
+
 // Sets default values
 ADefenseBlockBase::ADefenseBlockBase()
-	: BlockCost(10), Health(100.0f), Damage(10.0f), AttackCooldownTime(1.0f)
+	: BlockCost(10), StartingHealth(100.0f), CurrencyReward(10), Damage(10.0f),
+	AttackCooldownTime(1.0f)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -21,9 +24,14 @@ ADefenseBlockBase::ADefenseBlockBase()
 		&ADefenseBlockBase::ActorExitedAttackRange);
 
 	GetCharacterMovement()->GravityScale = 0.0f;
+
+
+	Tags.Add("Tower");
+
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCapsuleRadius(4.0f);
 	GetCapsuleComponent()->SetCapsuleHalfHeight(8.0f);
+	IsDead = false;
 }
 
 // Called when the game starts or when spawned
@@ -37,6 +45,7 @@ void ADefenseBlockBase::BeginPlay()
 		GetWorldTimerManager().SetTimer(AttackTimeHandle, this,
 			&ADefenseBlockBase::StartAttack, AttackCooldownTime, true);
 	}
+	CurrentHealth = StartingHealth;
 }
 
 void ADefenseBlockBase::StartAttack()
@@ -49,7 +58,7 @@ void ADefenseBlockBase::StartAttack()
 		}
 	}
 	if (EnemiesInRange.Num() > 0 && !CurrentGameMode->GetGamePaused() &&
-		CurrentGameMode->IsWaveInProgress())
+		CurrentGameMode->IsWaveInProgress() && !IsDead)
 	{
 		Attack();
 		GetSprite()->SetFlipbook(AttackAnimation);
@@ -69,6 +78,9 @@ void ADefenseBlockBase::ActorEnteredAttackRange(UPrimitiveComponent* OverlappedC
 		return;
 	}
 	EnemiesInRange.Add(enemy);
+	enemy->towerTargets.Add(this);
+
+
 }
 
 void ADefenseBlockBase::ActorExitedAttackRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -80,19 +92,10 @@ void ADefenseBlockBase::ActorExitedAttackRange(UPrimitiveComponent* OverlappedCo
 		return;
 	}
 	EnemiesInRange.Remove(enemy);
-}
+	enemy->towerTargets.Remove(this);
 
-void ADefenseBlockBase::CheckRemainingHealth()
-{
-	if (Health <= 0)
-	{
-		GetSprite()->SetFlipbook(DestroyedAnimation);
-		SetLifeSpan(5.0f);
-	}
-	else
-	{
-		GetSprite()->SetFlipbook(IdleAnimation);
-	}
+
+
 }
 
 void ADefenseBlockBase::ResetToIdleAnimation()
@@ -102,6 +105,10 @@ void ADefenseBlockBase::ResetToIdleAnimation()
 
 float ADefenseBlockBase::GetAnimationDuration(UPaperFlipbook* animation)
 {
+	if (animation == nullptr)
+	{
+		return 0.0f;
+	}
 	return animation->GetTotalDuration() * (1 / GetSprite()->GetPlayRate());
 }
 
@@ -113,9 +120,28 @@ void ADefenseBlockBase::Tick(float DeltaTime)
 
 void ADefenseBlockBase::DamageBlock(int damage)
 {
-	Health -= damage;
-	GetSprite()->SetFlipbook(TakeDamageAnimation);
-	GetWorldTimerManager().SetTimer(HealthCheckTimeHandle, this,
-		&ADefenseBlockBase::CheckRemainingHealth,
-		GetAnimationDuration(TakeDamageAnimation), false);
+	if (IsDead)
+	{
+		return;
+	}
+	CurrentHealth -= damage;
+	IsDead = (CurrentHealth <= 0);
+	if (IsDead)
+	{
+		CurrentGameMode->SetNumOfTowers(CurrentGameMode->GetNumOfTowers() - 1);
+		CurrentGameMode->StartingCurrency += CurrencyReward;
+		GetSprite()->SetFlipbook(DestroyedAnimation);
+		SetLifeSpan(DestroyedAnimation->GetTotalDuration());
+
+		towerSpot->occupied = false;
+		towerSpot->OccupyingTower = nullptr;
+
+	}
+	else
+	{
+		GetSprite()->SetFlipbook(TakeDamageAnimation);
+		GetWorldTimerManager().SetTimer(HealthCheckTimeHandle, this,
+			&ADefenseBlockBase::ResetToIdleAnimation,
+			GetAnimationDuration(TakeDamageAnimation), false);
+	}
 }

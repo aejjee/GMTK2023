@@ -40,7 +40,6 @@ void APlayerCharacter::BeginPlay()
 	if (APlayerController* playerController = Cast<APlayerController>(GetController())) {
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
 
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::White, playerController->GetName());
 		FString name = playerController->GetName();
 		UE_LOG(LogTemp, Warning, TEXT("Player Base Setting Up: %s"), *name);
 
@@ -61,19 +60,25 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 		return;
 	}
 	CurrentGameMode->CurrentCurrency -= spawnCost;
-	CurrentGameMode->NumOfEnemies++;
+	CurrentGameMode->SetNumOfEnemies(CurrentGameMode->GetNumOfEnemies() + 1);
 	
 	spawnTimer = 0.0f;
 	
 	FActorSpawnParameters params;
 	FVector spawnLocation = location;
-	spawnLocation.Y = 10.0f;
-
+	spawnLocation.Y = 0.0f;
+	
 	FTransform spawnTransform;
 	spawnTransform.SetLocation(spawnLocation);
 	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
-	
+
 	GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
+
+
+	if (spawnCue) {
+		UGameplayStatics::PlaySound2D(GetWorld(), spawnCue);
+	}
+
 }
 
 // Called every frame
@@ -86,10 +91,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 	//playerCamera->SetWorldRotation((GetActorLocation() - playerCamera->GetComponentLocation()).GetSafeNormal().ToOrientationRotator());
 	
 	playerCamera->SetRelativeLocation(FVector::ZeroVector);
-
-
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, GetActorLocation().ToString());
-
 }
 
 // Called to bind functionality to input
@@ -99,8 +100,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 
 	if (UEnhancedInputComponent* playerEnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-
-		//GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::White, "valid");
 
 		playerEnhancedInput->BindAction(leftDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::leftDownInput);
 		playerEnhancedInput->BindAction(leftReleaseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::leftReleaseInput);
@@ -140,9 +139,6 @@ void APlayerCharacter::leftClickInput(const FInputActionValue& value) {
 
 
 void APlayerCharacter::leftDownInput(const FInputActionValue& value) {
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Left Down");
-
-
 	//check if the cursor is over a timeline
 	FHitResult cursorHit;
 	//get the cursor hit result
@@ -150,8 +146,6 @@ void APlayerCharacter::leftDownInput(const FInputActionValue& value) {
 	//if the cursor is over anything
 	if (cursorHit.bBlockingHit) {
 		
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "hit");
-
 		//get the current grab location
 		FVector tempLocation = cursorHit.Location;
 		tempLocation.Y = GetActorLocation().Y;
@@ -187,8 +181,6 @@ void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 
 
 void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Right Down");
-
 	if (CurrentGameMode->IsWaveInProgress() || CurrentGameMode->GetGamePaused())
 	{
 		return;
@@ -201,6 +193,7 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	//get the cursor hit result
 	playerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, cursorHit);
 	
+
 	AFogOfWarCloud* fogReference = Cast<AFogOfWarCloud>(cursorHit.GetActor());
 	if (fogReference != nullptr)
 	{
@@ -209,7 +202,7 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	}
 	
 	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType)
-		{
+	{
 		SpawnEnemy(cursorHit.Location);
 	}
 	
