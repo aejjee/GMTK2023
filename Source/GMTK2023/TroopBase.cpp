@@ -67,7 +67,7 @@ void ATroopBase::Tick(float DeltaTime)
 
 	//if combat is on and game is unpaused
 	if (!CurrentGameMode->GetGamePaused() && CurrentGameMode->IsWaveInProgress()
-		&& !idle) {
+		&& !idle && !IsDead) {
 
 		inAttackRange = IsValid(targetedTower) && inAttackRange;
 		
@@ -119,9 +119,10 @@ bool ATroopBase::DamageHealth(float value) {
 	
 	if (health <= 0.0f) {
 		IsDead = true;
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString("Should despawn in .3 seconds"));
 		CurrentGameMode->SetNumOfEnemies(CurrentGameMode->GetNumOfEnemies() - 1);
 		GetSprite()->SetFlipbook(DeathAnimation);
-		SetLifeSpan(0.33f);
+		SetLifeSpan(DeathAnimation->GetTotalDuration());
 		return true;
 	}
 
@@ -329,6 +330,10 @@ void ATroopBase::OverrideLocationMarker(AMarker* marker)
 void ATroopBase::ReachedPlayerMarker()
 {
 	PlayerOverrideMarker = nullptr;
+	if (levelLocations[currentLocationPosition] == nullptr)
+	{
+		return;
+	}
 	targetLocation = levelLocations[currentLocationPosition];
 }
 

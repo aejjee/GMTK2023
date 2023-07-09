@@ -207,7 +207,6 @@ void APlayerCharacter::leftReleaseInput(const FInputActionValue& value) {
 
 void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 	APlayerController* playerController = Cast<APlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString("Right mouse click"));
 	//check if the cursor is over a timeline
 	FHitResult cursorHit;
 	//get the cursor hit result
