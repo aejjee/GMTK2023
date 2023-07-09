@@ -83,7 +83,7 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		float attackTimer;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UPaperFlipbook* attackAnimation;
 
 
