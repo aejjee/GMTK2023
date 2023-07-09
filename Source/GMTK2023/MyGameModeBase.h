@@ -129,6 +129,8 @@ public:
 	void SetNumOfEnemies(int newNum);
 
 
+	UFUNCTION(BlueprintImplementableEvent)
+		void CallWinLossEvent(bool winLoss);
 
 
 	UFUNCTION()

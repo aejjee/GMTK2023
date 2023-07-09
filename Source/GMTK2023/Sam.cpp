@@ -94,7 +94,7 @@ void ASam::ForceSpawnTowers(int waveNumber) {
 
 
 						FActorSpawnParameters params;
-						FVector spawnLocation = towerSpot->GetActorLocation();
+						FVector spawnLocation = towerSpot->GetActorLocation() + FVector(0.0f, -5.0f, 0.0f);
 						spawnLocation.Y = 0.0f;
 
 						FTransform spawnTransform;
