@@ -32,7 +32,11 @@ public:
 
 	// This block's total health.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Health;
+	float StartingHealth;
+	
+	// This character's current health
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentHealth;
 
 	// The damage this block does to enemies (if) it attacks.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -90,7 +94,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-
+	
 	// Used to run the attack timer
 	FTimerHandle AttackTimeHandle;
 	
@@ -99,6 +103,9 @@ private:
 	
 	// Used to run the health check timer after taking damage
 	FTimerHandle HealthCheckTimeHandle;
+
+	// Used to check whether this block is about to die.
+	bool IsDead;
 	
 	UFUNCTION()
 	// Gets called whenever an enemy enters the attack range.
@@ -111,9 +118,6 @@ private:
 	void ActorExitedAttackRange(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex);
-
-	// Checks whether this block should be destroyed now.
-	void CheckRemainingHealth();
 
 	// A oneliner that gets called after a certain duration to reset the flipbook
 	// to the idle animation

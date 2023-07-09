@@ -27,6 +27,15 @@ private:
 	// The number of enemies spawned this wave.
 	int NumOfEnemies;
 
+	// The number of towers in this level.
+	int NumOfTowers;
+
+	// The current wave count.
+	int CurrentWaveCount;
+
+	// The max wave count.
+	int MaxWaveCount;
+
 public:
 	// The amount of currency the player currently has to spend on enemies.
 	UPROPERTY(BlueprintReadOnly)
@@ -53,6 +62,31 @@ public:
 public:
 
 	AMyGameModeBase();
+
+	// Spawns a notification message on screen. Implement via blueprints.
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void SpawnNotification(const FString& message);
+	
+	// Gets the current number of towers
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	int GetNumOfTowers() const;
+
+	// Sets the current number of towers onscreen. When the number reaches 0,
+	// the level is automatically completed.
+	UFUNCTION(BlueprintCallable)
+	void SetNumOfTowers(int newNum);
+
+	// Gets the current wave count
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	int GetCurrentWaveCount();
+
+	// Gets the max wave count
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	int GetMaxWaveCount();
+	
+	// Sets the max wave count
+	UFUNCTION(BlueprintCallable)
+	void SetMaxWaveCount(int newCount);
 	
 	// Gets whether the game is currently paused, returning true if it is.
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -61,6 +95,10 @@ public:
 	// Gets whether the current wave is in progress.
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsWaveInProgress();
+
+	// Returns true if a wave can be started.
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool CanStartWave();
 
 	// Sets whether the game is paused (but still allow the player to move the
 	// camera around).
