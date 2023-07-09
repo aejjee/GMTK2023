@@ -63,6 +63,10 @@ public:
 
 	AMyGameModeBase();
 
+	// Spawns a notification message on screen. Implement via blueprints.
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void SpawnNotification(const FString& message);
+	
 	// Gets the current number of towers
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int GetNumOfTowers() const;
