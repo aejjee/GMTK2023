@@ -99,7 +99,11 @@ void APlayerCharacter::CreateLocationMarker(const FVector& location)
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATroopBase::StaticClass(), enemies);
 	for (int i = 0; i < enemies.Num(); i++)
 	{
-		enemies[i]->OverrideLocationMarker(marker);
+		ATroopBase* enemy = Cast<ATroopBase>(enemies[i]);
+		if (enemy != nullptr)
+		{
+			enemy->OverrideLocationMarker(marker);
+		}
 	}
 }
 

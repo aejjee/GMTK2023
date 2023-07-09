@@ -338,6 +338,11 @@ void ATroopBase::ActorExitedAttackRange(AActor* MyOverlappedActor, AActor* Other
 	towerTargets.Remove(enemy);
 }
 
+void ATroopBase::OverrideLocationMarker(AMarker* marker)
+{
+		
+}
+
 float ATroopBase::GetAnimationDuration(UPaperFlipbook* animation)
 {
 	return animation->GetTotalDuration() * (1 / GetSprite()->GetPlayRate());
