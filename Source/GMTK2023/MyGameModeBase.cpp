@@ -3,6 +3,9 @@
 
 #include "MyGameModeBase.h"
 
+#include "PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+
 void AMyGameModeBase::PauseGameButAllowCamera(bool isPaused)
 {
 	bGamePausedButAllowCamera = isPaused;
@@ -26,6 +29,11 @@ bool AMyGameModeBase::IsWaveInProgress()
 void AMyGameModeBase::StartWave()
 {
 	bCombatMode = true;
+	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
+	if (playerCharacter == nullptr)
+	{
+		return;
+	}
 }
 
 void AMyGameModeBase::FinishWave()
