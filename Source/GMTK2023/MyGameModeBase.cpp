@@ -14,8 +14,40 @@ void AMyGameModeBase::PauseGameButAllowCamera(bool isPaused)
 }
 
 AMyGameModeBase::AMyGameModeBase()
-	: NumOfEnemies(0), CurrentCurrency(50), StartingCurrency(50)
+	: NumOfEnemies(0), CurrentWaveCount(0), MaxWaveCount(5), CurrentCurrency(50),
+	StartingCurrency(50)
 {
+}
+
+int AMyGameModeBase::GetNumOfTowers() const
+{
+	return NumOfTowers;	
+}
+
+void AMyGameModeBase::SetNumOfTowers(int newNum)
+{
+	NumOfTowers = newNum;
+	if (NumOfTowers <= 0)
+	{
+		// Win condition code here.
+		FinishWave();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Add the win code here"));	
+	}
+}
+
+int AMyGameModeBase::GetCurrentWaveCount()
+{
+	return CurrentWaveCount;
+}
+
+int AMyGameModeBase::GetMaxWaveCount()
+{
+	return MaxWaveCount;
+}
+
+void AMyGameModeBase::SetMaxWaveCount(int newCount)
+{
+	MaxWaveCount = newCount;
 }
 
 bool AMyGameModeBase::GetGamePaused()
@@ -28,8 +60,19 @@ bool AMyGameModeBase::IsWaveInProgress()
 	return bCombatMode;
 }
 
+bool AMyGameModeBase::CanStartWave()
+{
+	return (NumOfEnemies > 0 && !IsWaveInProgress());
+}
+
 void AMyGameModeBase::StartWave()
 {
+	// It's not great for performance but it'll work
+	TArray<AActor*> FoundEnemies;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(),
+		ADefenseBlockBase::StaticClass(), FoundEnemies);
+	SetNumOfTowers(FoundEnemies.Num());
+	
 	bCombatMode = true;
 	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
 	if (playerCharacter == nullptr)
@@ -43,6 +86,12 @@ void AMyGameModeBase::FinishWave()
 	bCombatMode = false;
 	StartingCurrency += CurrencyPerWave;
 	CurrentCurrency = StartingCurrency;
+	CurrentWaveCount++;
+	if (CurrentWaveCount > MaxWaveCount)
+	{
+		// Lose condition here
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Add the lose code here"));
+	}
 }
 
 int AMyGameModeBase::GetNumOfEnemies() const
@@ -65,13 +114,12 @@ void AMyGameModeBase::BeginPlay()
 	CurrentCurrency = StartingCurrency;
 
 
-
 	sam = SpawnSam();
 
-	wave = 0;
+	CurrentWaveCount = 0;
 
 	sam->perRoundMoney = 30.0f;
-	sam->SpawnTowers(wave);
+	sam->SpawnTowers(CurrentWaveCount);
 
 }
 
