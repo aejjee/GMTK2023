@@ -61,6 +61,7 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 	int spawnCost = spawnType->GetDefaultObject<ATroopBase>()->SpawnCost;
 	if (CurrentGameMode->CurrentCurrency < spawnCost)
 	{
+		CurrentGameMode->SpawnNotification(FString("Not enough goo!"));
 		return;
 	}
 	CurrentGameMode->CurrentCurrency -= spawnCost;
