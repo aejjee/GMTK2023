@@ -8,6 +8,7 @@
 #include "InputAction.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Marker.h"
 #include "MyGameModeBase.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 
@@ -36,13 +37,16 @@ UCLASS()
 class GMTK2023_API APlayerCharacter : public APaperCharacter
 {
 	GENERATED_BODY()
-
+	
 public:
 	APlayerCharacter();
 
 	UPROPERTY(BlueprintReadWrite)
 		UCameraComponent* playerCamera;
 
+	// The marker class that will be spawned for use in navigation.
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AMarker> MarkerType;
 
 	UPROPERTY(BlueprintReadOnly)
 		FVector grabStartLocation;
@@ -124,8 +128,13 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+
+	
 	// Spawns an enemy at the given location.
 	void SpawnEnemy(const FVector& location);
+
+	// Creates a new location marker so the player can direct the enemies.
+	void CreateLocationMarker(const FVector& location);
 
 public:
 	// Called every frame

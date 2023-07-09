@@ -81,6 +81,28 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 
 }
 
+void APlayerCharacter::CreateLocationMarker(const FVector& location)
+{
+	FActorSpawnParameters params;
+	FVector spawnLocation = location;
+	spawnLocation.Y = 0.0f;
+	
+	FTransform spawnTransform;
+	spawnTransform.SetLocation(spawnLocation);
+	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
+
+	AMarker* marker = GetWorld()->SpawnActor<AMarker>(MarkerType, spawnTransform, params);
+	FString tag = FString("PlayerOverride");
+	marker->markerSpecialty = tag;
+
+	TArray<AActor*> enemies;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATroopBase::StaticClass(), enemies);
+	for (int i = 0; i < enemies.Num(); i++)
+	{
+		enemies[i]->OverrideLocationMarker(marker);
+	}
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -193,20 +215,27 @@ void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 	//get the cursor hit result
 	playerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, cursorHit);
 	
-
-	AFogOfWarCloud* fogReference = Cast<AFogOfWarCloud>(cursorHit.GetActor());
-	if (fogReference != nullptr)
+	if (CurrentGameMode->IsWaveInProgress())
 	{
-		// We shouldn't spawn enemies in the fog of war zone.
-		return;
+		if (cursorHit.bBlockingHit)
+		{
+			CreateLocationMarker(cursorHit.Location);	
+		}
 	}
-	
-	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType)
+	else
 	{
-		SpawnEnemy(cursorHit.Location);
-	}
+		AFogOfWarCloud* fogReference = Cast<AFogOfWarCloud>(cursorHit.GetActor());
+		if (fogReference != nullptr)
+		{
+			// We shouldn't spawn enemies in the fog of war zone.
+			return;
+		}
 	
-
+		if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType)
+		{
+			SpawnEnemy(cursorHit.Location);
+		}
+	}
 
 }
 
