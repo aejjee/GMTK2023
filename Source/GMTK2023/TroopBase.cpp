@@ -20,7 +20,7 @@ ATroopBase::ATroopBase()
 
 	health = 100.0f;
 
-	idle = false;
+	idle = true;
 
 	targetSearchTime = 0.0f;
 	attackTimer = 0.0f;
@@ -254,7 +254,7 @@ void ATroopBase::Move(float DeltaTime) {
 
 		//do a sweep move
 		FHitResult hitResult;
-		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), true, &hitResult);
+		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * moveSpeed * DeltaTime), true, &hitResult);
 
 		//but if troop is blocked by another troop rather than something else then move anyways
 		
@@ -265,7 +265,7 @@ void ATroopBase::Move(float DeltaTime) {
 		}
 
 		if (hitResult.bBlockingHit && hitResult.GetActor()->ActorHasTag("troop")) {
-			SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * 30.0f * DeltaTime), false);
+			SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * moveSpeed * DeltaTime), false);
 		}
 
 		//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, targetLocation->GetName());
@@ -290,7 +290,7 @@ void ATroopBase::Move(float DeltaTime) {
 		if (toTargetTower.Length() > attackRange) {
 			//do a sweep move
 			FHitResult hitResult;
-			SetActorLocation(GetActorLocation() + (toTargetTower.GetSafeNormal() * 30.0f * DeltaTime), true, &hitResult);
+			SetActorLocation(GetActorLocation() + (toTargetTower.GetSafeNormal() * moveSpeed * DeltaTime), true, &hitResult);
 
 			if (hitResult.GetActor() == nullptr)
 			{
@@ -300,7 +300,7 @@ void ATroopBase::Move(float DeltaTime) {
 			
 			//but if troop is blocked by another troop rather than something else then move anyways
 			if (hitResult.bBlockingHit && hitResult.GetActor()->ActorHasTag("troop")) {
-				SetActorLocation(GetActorLocation() + (toTargetTower.GetSafeNormal() * 30.0f * DeltaTime), false);
+				SetActorLocation(GetActorLocation() + (toTargetTower.GetSafeNormal() * moveSpeed * DeltaTime), false);
 			}
 		}
 		else if(!inAttackRange) {

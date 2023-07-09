@@ -81,6 +81,13 @@ void AMyGameModeBase::StartWave()
 	SetNumOfTowers(FoundEnemies.Num());
 	
 	bCombatMode = true;
+
+	TArray<AActor*> troopActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "0", troopActors);
+
+	for (AActor* troop : troopActors) {
+		Cast<ATroopBase>(troop)->idle = false;
+	}
 }
 
 void AMyGameModeBase::FinishWave()

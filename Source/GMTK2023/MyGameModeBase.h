@@ -16,13 +16,14 @@ class GMTK2023_API AMyGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
+
+
 private:
 	// Determines whether the game is paused (but still lets the player move the
 	// camera around).
 	bool bGamePausedButAllowCamera;
 
-	// Determines whether a wave is currently going.
-	bool bCombatMode;
+	
 	
 	// The number of enemies spawned this wave.
 	int NumOfEnemies;
@@ -57,6 +58,11 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 		ASam* sam;
+
+	// Determines whether a wave is currently going.
+	UPROPERTY(BlueprintReadOnly)
+		bool bCombatMode;
+
 
 
 public:

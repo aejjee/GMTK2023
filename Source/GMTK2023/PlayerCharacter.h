@@ -58,15 +58,21 @@ public:
 	AMyGameModeBase* CurrentGameMode;
 
 
+	//the type of troop that should spawn on input
 	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<ATroopBase> spawnType;
 	
+	//the timer for delaying until next spawn
 	UPROPERTY(BlueprintReadWrite)
 		float spawnTimer;
 
+	//the sound cue to play when spawning
 	UPROPERTY(EditAnywhere, BLueprintReadOnly)
 		USoundCue* spawnCue;
-
+	
+	//the group that a troop should be spawned into
+	UPROPERTY(BlueprintReadWrite)
+		int spawnGroup = 0;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controls")

@@ -45,6 +45,10 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool idle;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float moveSpeed = 30.0f;
+
 	// The cost of this enemy in currency
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int SpawnCost;	
@@ -54,6 +58,11 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 		int currentLocationPosition;
+
+
+
+	UPROPERTY(BlueprintReadWrite)
+		int groupNumber;
 	
 
 
