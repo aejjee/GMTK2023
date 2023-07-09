@@ -54,6 +54,10 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::SpawnEnemy(const FVector& location)
 {
+	if (CurrentGameMode->IsWaveInProgress() || CurrentGameMode->GetGamePaused())
+	{
+		return;
+	}
 	int spawnCost = spawnType->GetDefaultObject<ATroopBase>()->SpawnCost;
 	if (CurrentGameMode->CurrentCurrency < spawnCost)
 	{
@@ -81,6 +85,37 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 
 }
 
+void APlayerCharacter::CreateLocationMarker(const FVector& location)
+{
+	FActorSpawnParameters params;
+	FVector spawnLocation = location;
+	spawnLocation.Y = 0.0f;
+	
+	FTransform spawnTransform;
+	spawnTransform.SetLocation(spawnLocation);
+	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
+
+	AMarker* marker = GetWorld()->SpawnActor<AMarker>(MarkerType, spawnTransform, params);
+	if (marker == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("Location marker is null pointer")); 
+		return;
+	}
+	FString tag = FString("PlayerOverride");
+	marker->markerSpecialty = tag;
+
+	TArray<AActor*> enemies;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATroopBase::StaticClass(), enemies);
+	for (int i = 0; i < enemies.Num(); i++)
+	{
+		ATroopBase* enemy = Cast<ATroopBase>(enemies[i]);
+		if (enemy != nullptr)
+		{
+			enemy->OverrideLocationMarker(marker);
+		}
+	}
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -105,6 +140,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		playerEnhancedInput->BindAction(leftReleaseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::leftReleaseInput);
 
 		playerEnhancedInput->BindAction(rightDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::rightDownInput);
+		playerEnhancedInput->BindAction(rightClickAction, ETriggerEvent::Triggered, this, &APlayerCharacter::rightClickInput);
 
 
 		playerEnhancedInput->BindAction(lookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::lookInput);
@@ -112,23 +148,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		playerEnhancedInput->BindAction(scrollAction, ETriggerEvent::Triggered, this, &APlayerCharacter::scrollInput);
 
 	}
-
-
-
-
 }
-
-
 
 void APlayerCharacter::lookInput(const FInputActionValue& value) {
 
 	//turn
 	//AddControllerPitchInput(value.Get<FVector2D>().Y * 20.0f);
 	//AddControllerYawInput(value.Get<FVector2D>().X * 20.0f);
-
-
-
-
 }
 
 
@@ -176,38 +202,38 @@ void APlayerCharacter::leftReleaseInput(const FInputActionValue& value) {
 
 
 void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
-
-}
-
-
-void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
-	if (CurrentGameMode->IsWaveInProgress() || CurrentGameMode->GetGamePaused())
-	{
-		return;
-	}
-	
 	APlayerController* playerController = Cast<APlayerController>(GEngine->GetFirstLocalPlayerController(GetWorld()));
-
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString("Right mouse click"));
 	//check if the cursor is over a timeline
 	FHitResult cursorHit;
 	//get the cursor hit result
 	playerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, false, cursorHit);
 	
-
-	AFogOfWarCloud* fogReference = Cast<AFogOfWarCloud>(cursorHit.GetActor());
-	if (fogReference != nullptr)
+	if (CurrentGameMode->IsWaveInProgress())
 	{
-		// We shouldn't spawn enemies in the fog of war zone.
-		return;
+		if (cursorHit.bBlockingHit)
+		{
+			CreateLocationMarker(cursorHit.Location);	
+		}
 	}
-	
-	if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType)
+	else
 	{
-		SpawnEnemy(cursorHit.Location);
-	}
+		AFogOfWarCloud* fogReference = Cast<AFogOfWarCloud>(cursorHit.GetActor());
+		if (fogReference != nullptr)
+		{
+			// We shouldn't spawn enemies in the fog of war zone.
+			return;
+		}
 	
+		if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType)
+		{
+			SpawnEnemy(cursorHit.Location);
+		}
+	}
+}
 
-
+// change to right click input
+void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
 }
 
 void APlayerCharacter::scrollInput(const FInputActionValue& value) {
