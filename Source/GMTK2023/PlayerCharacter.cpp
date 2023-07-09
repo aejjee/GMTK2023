@@ -40,7 +40,6 @@ void APlayerCharacter::BeginPlay()
 	if (APlayerController* playerController = Cast<APlayerController>(GetController())) {
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
 
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::White, playerController->GetName());
 		FString name = playerController->GetName();
 		UE_LOG(LogTemp, Warning, TEXT("Player Base Setting Up: %s"), *name);
 
@@ -73,7 +72,6 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 	spawnTransform.SetLocation(spawnLocation);
 	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, spawnType->GetFName().ToString());
 	GetWorld()->SpawnActor<ATroopBase>(spawnType, spawnTransform, params);
 }
 
@@ -87,10 +85,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 	//playerCamera->SetWorldRotation((GetActorLocation() - playerCamera->GetComponentLocation()).GetSafeNormal().ToOrientationRotator());
 	
 	playerCamera->SetRelativeLocation(FVector::ZeroVector);
-
-
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, GetActorLocation().ToString());
-
 }
 
 // Called to bind functionality to input
@@ -100,8 +94,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 
 	if (UEnhancedInputComponent* playerEnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-
-		//GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::White, "valid");
 
 		playerEnhancedInput->BindAction(leftDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::leftDownInput);
 		playerEnhancedInput->BindAction(leftReleaseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::leftReleaseInput);
@@ -141,9 +133,6 @@ void APlayerCharacter::leftClickInput(const FInputActionValue& value) {
 
 
 void APlayerCharacter::leftDownInput(const FInputActionValue& value) {
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Left Down");
-
-
 	//check if the cursor is over a timeline
 	FHitResult cursorHit;
 	//get the cursor hit result
@@ -151,8 +140,6 @@ void APlayerCharacter::leftDownInput(const FInputActionValue& value) {
 	//if the cursor is over anything
 	if (cursorHit.bBlockingHit) {
 		
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, "hit");
-
 		//get the current grab location
 		FVector tempLocation = cursorHit.Location;
 		tempLocation.Y = GetActorLocation().Y;
@@ -188,8 +175,6 @@ void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 
 
 void APlayerCharacter::rightDownInput(const FInputActionValue& value) {
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, "Right Down");
-
 	if (CurrentGameMode->IsWaveInProgress() || CurrentGameMode->GetGamePaused())
 	{
 		return;

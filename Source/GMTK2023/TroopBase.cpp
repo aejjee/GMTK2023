@@ -93,7 +93,7 @@ void ATroopBase::Tick(float DeltaTime)
 
 			targetedTower->DamageBlock(attackDamage);
 
-			if (targetedTower->Health <= 0.0f) {
+			if (targetedTower->StartingHealth <= 0.0f) {
 				targetedTower = nullptr;
 			}
 
@@ -116,7 +116,7 @@ bool ATroopBase::DamageHealth(float value) {
 	health -= value;
 
 	if (health <= 0.0f) {
-		CurrentGameMode->SetNumOfEnemies(CurrentGameMode->GetNumOfEnemies());
+		CurrentGameMode->SetNumOfEnemies(CurrentGameMode->GetNumOfEnemies() - 1);
 		GetSprite()->SetFlipbook(DeathAnimation);
 		SetLifeSpan(0.33f);
 		return true;
