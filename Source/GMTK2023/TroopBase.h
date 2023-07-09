@@ -149,10 +149,22 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void PlayAttackAnimation();
 
+	// Overrides this enemy's current location marker and tells it to first go
+	// to this new one.
+	UFUNCTION(BlueprintCallable)
+	void OverrideLocationMarker(AMarker* marker);
+
+	// Tells the class to go back to following its regular route.
+	UFUNCTION(BlueprintCallable)
+	void ReachedPlayerMarker();
 
 private:
 	// Tells you whether this actor is dead and is about to be destroyed
 	bool IsDead;
+
+	// Holds the special player override marker (if it exists)
+	UPROPERTY()
+	AMarker* PlayerOverrideMarker;
 	
 	// Gets the number of seconds for this animation, taking play rate into account.
 	float GetAnimationDuration(UPaperFlipbook* animation);
