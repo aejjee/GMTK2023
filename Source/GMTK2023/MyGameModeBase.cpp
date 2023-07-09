@@ -3,9 +3,10 @@
 
 #include "MyGameModeBase.h"
 
-#include "DefenseBlockBase.h"
 #include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
+
+#include "Sam.h"
 
 void AMyGameModeBase::PauseGameButAllowCamera(bool isPaused)
 {
@@ -13,24 +14,8 @@ void AMyGameModeBase::PauseGameButAllowCamera(bool isPaused)
 }
 
 AMyGameModeBase::AMyGameModeBase()
-	: NumOfEnemies(0), CurrentWaveCount(0), MaxWaveCount(5), CurrentCurrency(50),
-	StartingCurrency(50)
+	: NumOfEnemies(0), CurrentCurrency(50), StartingCurrency(50)
 {
-}
-
-int AMyGameModeBase::GetCurrentWaveCount()
-{
-	return CurrentWaveCount;
-}
-
-int AMyGameModeBase::GetMaxWaveCount()
-{
-	return MaxWaveCount;
-}
-
-void AMyGameModeBase::SetMaxWaveCount(int newCount)
-{
-	MaxWaveCount = newCount;
 }
 
 bool AMyGameModeBase::GetGamePaused()
@@ -74,28 +59,33 @@ void AMyGameModeBase::SetNumOfEnemies(int newNum)
 	}
 }
 
-int AMyGameModeBase::GetNumOfTowers() const
-{
-	return NumOfTowers;
-}
-
-void AMyGameModeBase::SetNumOfTowers(int newNum)
-{
-	NumOfTowers = newNum;
-	if (NumOfTowers <= 0)
-	{
-		// todo: add code for win condition
-		FinishWave();
-	}
-}
-
 void AMyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentCurrency = StartingCurrency;
 
-	TArray<AActor*> FoundEnemies;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(),
-		ADefenseBlockBase::StaticClass(), FoundEnemies);
-	NumOfTowers = FoundEnemies.Num();
+
+
+	sam = SpawnSam();
+
+	wave = 0;
+
+	sam->perRoundMoney = 30.0f;
+	sam->SpawnTowers(wave);
+
+}
+
+
+ASam* AMyGameModeBase::SpawnSam() {
+
+	FActorSpawnParameters params;
+
+	FTransform spawnTransform;
+	spawnTransform.SetLocation(FVector::ZeroVector);
+	spawnTransform.SetRotation(FVector(1.0f, 0.0f, 0.0f).Rotation().Quaternion());
+
+
+	ASam* retSam = GetWorld()->SpawnActor<ASam>(samClass, params);
+
+	return retSam;
 }

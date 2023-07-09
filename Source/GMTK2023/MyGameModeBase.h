@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "MyGameModeBase.generated.h"
 
+class ASam;
+
 /**
  * 
  */
@@ -25,15 +27,6 @@ private:
 	// The number of enemies spawned this wave.
 	int NumOfEnemies;
 
-	// The number of towers Sam has.
-	int NumOfTowers;
-
-	// The number of attack waves that have happened.
-	int CurrentWaveCount;
-
-	// The maximum number of allowed attack waves.
-	int MaxWaveCount;
-
 public:
 	// The amount of currency the player currently has to spend on enemies.
 	UPROPERTY(BlueprintReadOnly)
@@ -47,21 +40,19 @@ public:
 	UPROPERTY(EditAnywhere)
 	int CurrencyPerWave;
 
+	UPROPERTY(BlueprintReadOnly)
+		int wave;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<ASam> samClass;
+
+	UPROPERTY(BlueprintReadOnly)
+		ASam* sam;
+
+
 public:
 
 	AMyGameModeBase();
-
-	// Get the number of currently counted attack waves.
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	int GetCurrentWaveCount();
-
-	// Get the maximum number of allowed waves for this level.
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	int GetMaxWaveCount();
-
-	// Set the maximum number of allowed waves for this level.
-	UFUNCTION(BlueprintCallable)
-	void SetMaxWaveCount(int newCount);
 	
 	// Gets whether the game is currently paused, returning true if it is.
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -93,15 +84,12 @@ public:
 	UFUNCTION(BlueprintSetter)
 	void SetNumOfEnemies(int newNum);
 
-	// Gets the current number of towers
-	UFUNCTION(BlueprintGetter)
-	int GetNumOfTowers() const;
 
-	// Sets the current number of towers onscreen. When the number reaches 0,
-	// the level is automatically completed.
-	UFUNCTION(BlueprintSetter)
-	void SetNumOfTowers(int newNum);
-	
+
+
+	UFUNCTION()
+		ASam* SpawnSam();
+
 protected:
 	virtual void BeginPlay() override;
 };
