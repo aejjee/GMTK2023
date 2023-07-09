@@ -9,6 +9,10 @@
 #include "PaperFlipbook.h"
 #include "DefenseBlockBase.generated.h"
 
+
+
+class ATowerSpot;
+
 /**
  * 
  */
@@ -73,6 +77,13 @@ public:
 	// A reference to the current game mode.
 	UPROPERTY(BlueprintReadOnly)
 	AMyGameModeBase* CurrentGameMode;
+
+
+	// The spot that this tower is sitting on
+	UPROPERTY(BlueprintReadOnly)
+		ATowerSpot* towerSpot;
+
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

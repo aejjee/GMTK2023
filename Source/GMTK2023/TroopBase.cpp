@@ -93,7 +93,11 @@ void ATroopBase::Tick(float DeltaTime)
 
 			targetedTower->DamageBlock(attackDamage);
 
-			if (targetedTower->StartingHealth <= 0.0f) {
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, "Removed Target Tower");
+
+
+			if (targetedTower->CurrentHealth <= 0.0f) {
+				towerTargets.Remove(targetedTower);
 				targetedTower = nullptr;
 			}
 
