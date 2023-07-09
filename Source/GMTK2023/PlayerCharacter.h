@@ -58,7 +58,7 @@ public:
 
 
 	UPROPERTY(BlueprintReadWrite)
-		TSubclassOf<ATroopBase> spawnType;
+	TSubclassOf<ATroopBase> spawnType;
 	UPROPERTY(BlueprintReadWrite)
 		float spawnTimer;
 

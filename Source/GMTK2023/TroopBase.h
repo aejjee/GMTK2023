@@ -46,7 +46,7 @@ public:
 	bool idle;
 
 	// The cost of this enemy in currency
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int SpawnCost;	
 	
 	UPROPERTY(BlueprintReadWrite)

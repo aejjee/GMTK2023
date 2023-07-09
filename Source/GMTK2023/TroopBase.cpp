@@ -91,7 +91,7 @@ void ATroopBase::Tick(float DeltaTime)
 		//if in range of the tower then attack
 		if (inAttackRange && attackTimer > attackSpeed) {
 
-			bool killed = targetedTower->DamageBlock(attackDamage);
+			targetedTower->DamageBlock(attackDamage);
 
 			if (targetedTower->Health <= 0.0f) {
 				targetedTower = nullptr;
@@ -115,12 +115,10 @@ void ATroopBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 bool ATroopBase::DamageHealth(float value) {
 	health -= value;
 
-
 	if (health <= 0.0f) {
-	    CurrentGameMode->NumOfEnemies--;
+		CurrentGameMode->SetNumOfEnemies(CurrentGameMode->GetNumOfEnemies());
 		GetSprite()->SetFlipbook(DeathAnimation);
-		SetLifeSpan(5.0f);
-		Destroy();
+		SetLifeSpan(0.33f);
 		return true;
 	}
 
@@ -279,6 +277,12 @@ void ATroopBase::Move(float DeltaTime) {
 			FHitResult hitResult;
 			SetActorLocation(GetActorLocation() + (toTargetTower.GetSafeNormal() * 30.0f * DeltaTime), true, &hitResult);
 
+			if (hitResult.GetActor() == nullptr)
+			{
+				// Keep the editor from dying if the enemy dies
+				return;
+			}
+			
 			//but if troop is blocked by another troop rather than something else then move anyways
 			if (hitResult.bBlockingHit && hitResult.GetActor()->ActorHasTag("troop")) {
 				SetActorLocation(GetActorLocation() + (toTargetTower.GetSafeNormal() * 30.0f * DeltaTime), false);
@@ -317,8 +321,6 @@ void ATroopBase::ActorExitedAttackRange(AActor* MyOverlappedActor, AActor* Other
 		return;
 	}
 	towerTargets.Remove(enemy);
-}
-
 }
 
 float ATroopBase::GetAnimationDuration(UPaperFlipbook* animation)
