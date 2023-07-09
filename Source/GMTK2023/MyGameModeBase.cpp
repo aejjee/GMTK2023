@@ -67,6 +67,13 @@ bool AMyGameModeBase::CanStartWave()
 
 void AMyGameModeBase::StartWave()
 {
+	if (IsWaveInProgress())
+	{
+		return;
+	}
+	FString count = FString::FromInt(CurrentWaveCount + 1);
+	FString message = FString("Wave ").Append(count).Append(": Attack Phase");
+	SpawnNotification(message);
 	// It's not great for performance but it'll work
 	TArray<AActor*> FoundEnemies;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(),
@@ -74,11 +81,6 @@ void AMyGameModeBase::StartWave()
 	SetNumOfTowers(FoundEnemies.Num());
 	
 	bCombatMode = true;
-	const APlayerCharacter* playerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
-	if (playerCharacter == nullptr)
-	{
-		return;
-	}
 }
 
 void AMyGameModeBase::FinishWave()
@@ -97,6 +99,12 @@ void AMyGameModeBase::FinishWave()
 	{
 		// Lose condition here
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Add the lose code here"));
+	}
+	else
+	{
+		FString count = FString::FromInt(CurrentWaveCount + 1);
+		FString message = FString("Wave ").Append(count).Append(": Preparation Phase");
+		SpawnNotification(message);
 	}
 }
 
@@ -127,6 +135,9 @@ void AMyGameModeBase::BeginPlay()
 	sam->perRoundMoney = 30.0f;
 	sam->SpawnTowers(CurrentWaveCount);
 
+	FString count = FString::FromInt(CurrentWaveCount + 1);
+	FString message = FString("Wave ").Append(count).Append(": Preparation Phase");
+	SpawnNotification(message);
 }
 
 

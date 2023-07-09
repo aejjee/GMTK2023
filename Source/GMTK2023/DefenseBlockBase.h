@@ -37,6 +37,10 @@ public:
 	// This block's total health.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float StartingHealth;
+
+	// The amount of currency the player gets for destroying this tower.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrencyReward;
 	
 	// This character's current health
 	UPROPERTY(BlueprintReadOnly)
