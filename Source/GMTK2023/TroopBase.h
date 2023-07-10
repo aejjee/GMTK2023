@@ -41,6 +41,13 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		AMarker* nextLocation;
 
+	UPROPERTY(BlueprintReadWrite)
+		bool overrideLocationSet;
+
+	UPROPERTY(BlueprintReadWrite)
+		FVector overrideLocation;
+
+
 	// Used to stop the troops if they get to the end of the path.	
 	UPROPERTY(BlueprintReadWrite)
 	bool idle;

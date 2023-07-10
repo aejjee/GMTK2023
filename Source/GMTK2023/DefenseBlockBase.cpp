@@ -137,6 +137,16 @@ void ADefenseBlockBase::DamageBlock(int damage)
 			towerSpot->occupied = false;
 			towerSpot->OccupyingTower = nullptr;
 		}
+
+		for (ATroopBase* troop : EnemiesInRange) {
+			if (troop->towerTargets.Contains(this)) {
+				troop->towerTargets.Remove(this);
+				
+			}
+			if (troop->targetedTower == this) {
+				troop->targetedTower = nullptr;
+			}
+		}
 		
 
 	}
