@@ -4,6 +4,7 @@
 #include "PlayerCharacter.h"
 
 #include "FogOfWarCloud.h"
+#include "InSceneText.h"
 #include "TroopBase.h"
 
 
@@ -242,7 +243,8 @@ void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 	else
 	{
 		AFogOfWarCloud* fogReference = Cast<AFogOfWarCloud>(cursorHit.GetActor());
-		if (fogReference != nullptr)
+		AInSceneText* textReference = Cast<AInSceneText>(cursorHit.GetActor());
+		if (fogReference != nullptr || textReference != nullptr)
 		{
 			// We shouldn't spawn enemies in the fog of war zone.
 			return;
