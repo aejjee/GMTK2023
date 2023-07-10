@@ -137,7 +137,7 @@ private:
 
 	
 	// Spawns an enemy at the given location.
-	void SpawnEnemy(const FVector& location);
+	void SpawnEnemy(const FHitResult& cursorHit);
 
 	// Creates a new location marker so the player can direct the enemies.
 	void CreateLocationMarker(const FVector& location);
