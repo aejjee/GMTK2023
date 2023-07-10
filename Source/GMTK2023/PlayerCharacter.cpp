@@ -52,7 +52,7 @@ void APlayerCharacter::BeginPlay()
 	GetWorld()->GetFirstPlayerController()->SetControlRotation(FVector(0.0f, 1.0f, 0.0f).Rotation());
 }
 
-void APlayerCharacter::SpawnEnemy(const FVector& location)
+void APlayerCharacter::SpawnEnemy(const FHitResult& cursorHit)
 {
 	if (CurrentGameMode->IsWaveInProgress() || CurrentGameMode->GetGamePaused())
 	{
@@ -69,9 +69,19 @@ void APlayerCharacter::SpawnEnemy(const FVector& location)
 	
 	spawnTimer = 0.0f;
 	
+
+	FVector spawnLocation = cursorHit.Location;
+	spawnLocation.Y = 3.0f;
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, cursorHit.GetActor()->GetName());
+
+	if (cursorHit.GetActor()->ActorHasTag("troop")) {
+		spawnLocation.X += FMath::RandRange(-20.0f, 20.0f);
+		spawnLocation.Z += FMath::RandRange(-20.0f, 20.0f);
+	}
+
 	FActorSpawnParameters params;
-	FVector spawnLocation = location;
-	spawnLocation.Y = 0.0f;
+	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
 	FTransform spawnTransform;
 	spawnTransform.SetLocation(spawnLocation);
@@ -216,7 +226,17 @@ void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 	{
 		if (cursorHit.bBlockingHit)
 		{
-			CreateLocationMarker(cursorHit.Location);	
+			//CreateLocationMarker(cursorHit.Location);	
+
+			TArray<AActor*> troopActors;
+			UGameplayStatics::GetAllActorsWithTag(GetWorld(), "troop", troopActors);
+
+			for (AActor* troop : troopActors) {
+				Cast<ATroopBase>(troop)->overrideLocationSet = true;
+				Cast<ATroopBase>(troop)->overrideLocation = cursorHit.Location;
+				Cast<ATroopBase>(troop)->overrideLocation.Y = 0.0f;
+
+			}
 		}
 	}
 	else
@@ -230,7 +250,7 @@ void APlayerCharacter::rightClickInput(const FInputActionValue& value) {
 	
 		if (cursorHit.bBlockingHit && spawnTimer > 0.2f && spawnType)
 		{
-			SpawnEnemy(cursorHit.Location);
+			SpawnEnemy(cursorHit);
 		}
 	}
 }

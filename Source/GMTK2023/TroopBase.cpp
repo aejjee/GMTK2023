@@ -65,6 +65,11 @@ void ATroopBase::Tick(float DeltaTime)
 	targetSearchTime += DeltaTime;
 	attackTimer += DeltaTime;
 
+
+	if (targetedTower) {
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, targetedTower->GetName());
+	}
+
 	//if combat is on and game is unpaused
 	if (!CurrentGameMode->GetGamePaused() && CurrentGameMode->IsWaveInProgress()
 		&& !idle && !IsDead) {
@@ -87,12 +92,17 @@ void ATroopBase::Tick(float DeltaTime)
 
 			targetedTower->DamageBlock(attackDamage);
 
+			//refresh if in attack range is relevant (if tower died cant be in attack range)
+			inAttackRange = IsValid(targetedTower) && inAttackRange;
 
 
-			if (targetedTower->CurrentHealth <= 0.0f) {
-				towerTargets.Remove(targetedTower);
-				targetedTower = nullptr;
+			if (targetedTower) {
+				if (targetedTower->CurrentHealth <= 0.0f) {
+					towerTargets.Remove(targetedTower);
+					targetedTower = nullptr;
+				}
 			}
+			
 
 			PlayAttackAnimation();
 
@@ -229,13 +239,49 @@ void ATroopBase::Move(float DeltaTime) {
 
 	// If the player manually overrides the location markers, then go there
 	// instead.
-	if (PlayerOverrideMarker != nullptr)
+	if (overrideLocationSet)
 	{
-		targetLocation = PlayerOverrideMarker;	
+		//targetLocation = PlayerOverrideMarker;	
+
+
+		FVector toTargetLocation = overrideLocation - GetActorLocation();
+
+		//rotate only facing left or right
+		FVector rotationV = toTargetLocation;
+		rotationV.Z = 0.0f;
+		rotationV.Y = 0.0f;
+
+		SetActorRotation(rotationV.GetSafeNormal().Rotation());
+
+		//do a sweep move
+		FHitResult hitResult;
+		SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * moveSpeed * DeltaTime), true, &hitResult);
+
+		//but if troop is blocked by another troop rather than something else then move anyways
+
+		if (hitResult.GetActor() == nullptr)
+		{
+			// Keeps the editor from dying if an enemy gets killed.
+			return;
+		}
+
+		if (hitResult.bBlockingHit && hitResult.GetActor()->ActorHasTag("troop")) {
+			SetActorLocation(GetActorLocation() + (toTargetLocation.GetSafeNormal() * moveSpeed * DeltaTime), false);
+		}
+		
+
+		//update toTargetLocation and check if close to override location now to unset it
+		toTargetLocation = overrideLocation - GetActorLocation();
+		if (toTargetLocation.Length() < 5.0f) {
+			overrideLocationSet = false;
+
+		}
+
+
+
 	}
-	
 	//if there is a targeted path marker, and we aren't currently attacking a tower, then move towards the marker
-	if (targetLocation && !targetedTower) {
+	else if (targetLocation && !targetedTower) {
 
 		FVector toTargetLocation = targetLocation->GetActorLocation() - GetActorLocation();
 
